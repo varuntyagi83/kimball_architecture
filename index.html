@@ -1,0 +1,2117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kimball Dimensional Modeling — Mastering the Architecture of Analytics</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800;900&family=Source+Sans+3:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-primary: #0a0e17;
+  --bg-secondary: #111827;
+  --bg-card: #1a2234;
+  --bg-card-hover: #1e2a42;
+  --bg-accent: #0f1a2e;
+  --text-primary: #e8edf5;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --accent-gold: #f0c55b;
+  --accent-gold-dim: rgba(240, 197, 91, 0.15);
+  --accent-blue: #3b82f6;
+  --accent-blue-dim: rgba(59, 130, 246, 0.12);
+  --accent-teal: #14b8a6;
+  --accent-teal-dim: rgba(20, 184, 166, 0.12);
+  --accent-purple: #a78bfa;
+  --accent-purple-dim: rgba(167, 139, 250, 0.12);
+  --accent-rose: #f43f5e;
+  --accent-rose-dim: rgba(244, 63, 94, 0.12);
+  --accent-orange: #f97316;
+  --accent-orange-dim: rgba(249, 115, 22, 0.12);
+  --accent-emerald: #10b981;
+  --accent-emerald-dim: rgba(16, 185, 129, 0.12);
+  --border-color: rgba(148, 163, 184, 0.1);
+  --border-glow: rgba(240, 197, 91, 0.25);
+  --shadow-soft: 0 4px 24px rgba(0, 0, 0, 0.3);
+  --shadow-glow: 0 0 40px rgba(240, 197, 91, 0.08);
+  --radius: 12px;
+  --radius-lg: 20px;
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+body {
+  font-family: 'Source Sans 3', sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.75;
+  font-size: 17px;
+  overflow-x: hidden;
+}
+body::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 9999;
+}
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--bg-primary); }
+::-webkit-scrollbar-thumb { background: var(--accent-gold); border-radius: 4px; }
+
+/* ── Nav ── */
+.top-nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+  background: rgba(10, 14, 23, 0.92); backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border-color);
+  padding: 0 2rem; height: 70px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.nav-brand {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.3rem; font-weight: 700; color: var(--accent-gold);
+  letter-spacing: 0.5px; white-space: nowrap;
+}
+/* ── Desktop Dropdown Nav ── */
+.nav-links { display: flex; gap: 0.15rem; align-items: center; }
+.nav-item {
+  color: var(--text-secondary); font-size: 0.82rem; font-weight: 500;
+  padding: 0.45rem 0.75rem; border-radius: 6px;
+  transition: var(--transition); white-space: nowrap; cursor: pointer;
+  user-select: none; position: relative;
+}
+.nav-item:hover, .nav-item.active {
+  color: var(--accent-gold); background: var(--accent-gold-dim);
+}
+.nav-dropdown { position: relative; }
+.nav-dropdown > .nav-item::after {
+  content: ' ▾'; font-size: 0.65rem; opacity: 0.5;
+}
+.nav-dropdown-menu {
+  position: absolute; top: calc(100% + 6px); left: 50%; transform: translateX(-50%);
+  background: rgba(17, 24, 39, 0.97); backdrop-filter: blur(20px);
+  border: 1px solid var(--border-color); border-radius: 10px;
+  padding: 0.5rem; min-width: 180px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+  opacity: 0; visibility: hidden;
+  transition: opacity 0.2s, visibility 0.2s, transform 0.2s;
+  transform: translateX(-50%) translateY(6px);
+  z-index: 2000;
+}
+.nav-dropdown:hover > .nav-dropdown-menu,
+.nav-dropdown.open > .nav-dropdown-menu {
+  opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0);
+}
+.nav-dropdown-menu .nav-sub-item {
+  display: block; width: 100%; text-align: left;
+  color: var(--text-secondary); font-size: 0.82rem; font-weight: 500;
+  padding: 0.5rem 0.85rem; border-radius: 6px;
+  transition: var(--transition); cursor: pointer; user-select: none;
+  white-space: nowrap;
+}
+.nav-dropdown-menu .nav-sub-item:hover,
+.nav-dropdown-menu .nav-sub-item.active {
+  color: var(--accent-gold); background: var(--accent-gold-dim);
+}
+.nav-dropdown-menu .dropdown-label {
+  font-size: 0.65rem; font-weight: 700; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 1.5px;
+  padding: 0.4rem 0.85rem 0.2rem; pointer-events: none;
+}
+
+/* ── Hamburger Button ── */
+.hamburger {
+  display: none; flex-direction: column; justify-content: center; gap: 5px;
+  width: 36px; height: 36px; cursor: pointer;
+  background: none; border: none; padding: 6px;
+  border-radius: 6px; transition: var(--transition);
+}
+.hamburger:hover { background: var(--accent-gold-dim); }
+.hamburger span {
+  display: block; width: 100%; height: 2px; background: var(--text-secondary);
+  border-radius: 2px; transition: all 0.3s;
+}
+.hamburger.active span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); background: var(--accent-gold); }
+.hamburger.active span:nth-child(2) { opacity: 0; }
+.hamburger.active span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); background: var(--accent-gold); }
+
+/* ── Mobile Slide-Out Menu ── */
+.mobile-menu {
+  display: none; position: fixed; top: 70px; left: 0; right: 0; bottom: 0;
+  background: rgba(10, 14, 23, 0.98); backdrop-filter: blur(20px);
+  z-index: 1500; overflow-y: auto; padding: 1.5rem;
+  transform: translateX(100%); transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.mobile-menu.open { transform: translateX(0); }
+.mobile-menu-group { margin-bottom: 1.5rem; }
+.mobile-menu-label {
+  font-size: 0.7rem; font-weight: 700; color: var(--accent-gold);
+  text-transform: uppercase; letter-spacing: 2px;
+  padding: 0 0.5rem 0.5rem; border-bottom: 1px solid var(--border-color);
+  margin-bottom: 0.4rem;
+}
+.mobile-menu-item {
+  display: block; color: var(--text-secondary); font-size: 1rem; font-weight: 500;
+  padding: 0.7rem 0.75rem; border-radius: 8px;
+  transition: var(--transition); cursor: pointer; user-select: none;
+}
+.mobile-menu-item:hover, .mobile-menu-item.active {
+  color: var(--accent-gold); background: var(--accent-gold-dim);
+}
+
+/* ── Progress ── */
+.progress-container {
+  position: fixed; top: 70px; left: 0; right: 0;
+  height: 3px; background: rgba(255,255,255,0.05); z-index: 999;
+}
+.progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent-gold), var(--accent-orange)); transition: width 0.15s linear; }
+
+/* ── Hero ── */
+.hero {
+  min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  text-align: center; padding: 6rem 2rem 4rem; position: relative; overflow: hidden;
+}
+.hero::before {
+  content: ''; position: absolute; top: -30%; left: -20%; width: 140%; height: 160%;
+  background: radial-gradient(ellipse at 30% 20%, rgba(240,197,91,0.06) 0%, transparent 50%),
+              radial-gradient(ellipse at 70% 80%, rgba(59,130,246,0.04) 0%, transparent 50%),
+              radial-gradient(ellipse at 50% 50%, rgba(167,139,250,0.03) 0%, transparent 60%);
+  pointer-events: none;
+}
+.hero-content { position: relative; max-width: 900px; }
+.hero-badge {
+  display: inline-block; padding: 0.5rem 1.5rem;
+  background: var(--accent-gold-dim); border: 1px solid rgba(240,197,91,0.2);
+  border-radius: 50px; font-size: 0.85rem; font-weight: 600;
+  color: var(--accent-gold); letter-spacing: 2px; text-transform: uppercase;
+  margin-bottom: 2rem; animation: fadeSlideDown 0.8s ease-out;
+}
+.hero h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2.8rem, 6vw, 5rem); font-weight: 900;
+  line-height: 1.1; margin-bottom: 1.5rem;
+  animation: fadeSlideDown 0.8s ease-out 0.15s both;
+}
+.hero h1 .highlight {
+  background: linear-gradient(135deg, var(--accent-gold), var(--accent-orange));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.hero .subtitle {
+  font-size: 1.25rem; color: var(--text-secondary); max-width: 680px;
+  margin: 0 auto 2.5rem; line-height: 1.8; animation: fadeSlideDown 0.8s ease-out 0.3s both;
+}
+.hero-meta {
+  display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap;
+  animation: fadeSlideDown 0.8s ease-out 0.45s both;
+}
+.hero-meta-item { display: flex; align-items: center; gap: 0.5rem; color: var(--text-muted); font-size: 0.9rem; }
+.hero-meta-item .icon {
+  width: 36px; height: 36px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center; font-size: 1rem;
+}
+
+/* ── Section ── */
+.section { padding: 5rem 2rem; max-width: 1200px; margin: 0 auto; }
+.section-header { text-align: center; margin-bottom: 4rem; }
+.section-number {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; font-weight: 600;
+  color: var(--accent-gold); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 0.75rem;
+}
+.section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2rem, 4vw, 3rem); font-weight: 800; margin-bottom: 1rem; line-height: 1.2;
+}
+.section-subtitle { color: var(--text-secondary); font-size: 1.1rem; max-width: 700px; margin: 0 auto; }
+.section-divider { width: 60px; height: 3px; background: linear-gradient(90deg, var(--accent-gold), var(--accent-orange)); border-radius: 3px; margin: 0 auto 2rem; }
+
+/* ── Card ── */
+.card {
+  background: var(--bg-card); border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg); padding: 2rem;
+  transition: var(--transition); position: relative; overflow: hidden;
+}
+.card:hover { border-color: var(--border-glow); box-shadow: var(--shadow-glow); transform: translateY(-2px); }
+.card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; opacity: 0; transition: opacity 0.3s; }
+.card:hover::before { opacity: 1; }
+.card.gold::before { background: linear-gradient(90deg, var(--accent-gold), var(--accent-orange)); }
+.card.blue::before { background: linear-gradient(90deg, var(--accent-blue), var(--accent-teal)); }
+.card.purple::before { background: linear-gradient(90deg, var(--accent-purple), var(--accent-rose)); }
+.card.teal::before { background: linear-gradient(90deg, var(--accent-teal), var(--accent-emerald)); }
+.card.rose::before { background: linear-gradient(90deg, var(--accent-rose), var(--accent-orange)); }
+.card.orange::before { background: linear-gradient(90deg, var(--accent-orange), var(--accent-gold)); }
+.card-icon {
+  width: 52px; height: 52px; border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.5rem; margin-bottom: 1.25rem;
+}
+.card h3 { font-family: 'Playfair Display', serif; font-size: 1.35rem; font-weight: 700; margin-bottom: 0.75rem; }
+.card p, .card li { color: var(--text-secondary); font-size: 0.95rem; line-height: 1.75; }
+.card-wide { padding: 2.5rem; }
+
+/* ── Grids ── */
+.grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 1.5rem; }
+.grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
+.grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; }
+
+/* ── Analogy ── */
+.analogy-box {
+  background: linear-gradient(135deg, rgba(240,197,91,0.08), rgba(249,115,22,0.05));
+  border: 1px solid rgba(240,197,91,0.15); border-radius: var(--radius-lg);
+  padding: 2rem; margin: 2rem 0; position: relative;
+}
+.analogy-box::before { content: '💡'; position: absolute; top: -14px; left: 24px; font-size: 1.5rem; background: var(--bg-primary); padding: 0 0.5rem; }
+.analogy-box .analogy-title { font-family: 'Playfair Display', serif; font-size: 1.15rem; font-weight: 700; color: var(--accent-gold); margin-bottom: 0.75rem; }
+.analogy-box p { color: var(--text-secondary); line-height: 1.8; }
+
+/* ── Code ── */
+.code-block {
+  background: #0d1117; border: 1px solid rgba(148,163,184,0.1);
+  border-radius: var(--radius); padding: 1.5rem; margin: 1.5rem 0;
+  overflow-x: auto; position: relative;
+}
+.code-block .code-label {
+  position: absolute; top: 0; right: 0;
+  background: rgba(240,197,91,0.15); color: var(--accent-gold);
+  font-family: 'JetBrains Mono', monospace; font-size: 0.7rem;
+  font-weight: 600; padding: 0.3rem 0.8rem;
+  border-radius: 0 11px 0 8px; letter-spacing: 1px; text-transform: uppercase;
+}
+.code-block pre {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.85rem;
+  line-height: 1.7; color: #c9d1d9; white-space: pre; overflow-x: auto;
+}
+.code-block .kw { color: #ff7b72; }
+.code-block .fn { color: #d2a8ff; }
+.code-block .str { color: #a5d6ff; }
+.code-block .cm { color: #8b949e; }
+.code-block .type { color: #79c0ff; }
+.code-block .num { color: #f0c55b; }
+
+/* ── Diagram ── */
+.diagram-container {
+  background: var(--bg-card); border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg); padding: 2.5rem; margin: 2rem 0;
+  text-align: center; overflow-x: auto;
+}
+.diagram-title { font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 700; margin-bottom: 1.5rem; color: var(--accent-gold); }
+
+/* ── Table ── */
+.styled-table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.9rem; }
+.styled-table thead th {
+  background: rgba(240,197,91,0.1); color: var(--accent-gold);
+  font-weight: 600; text-align: left; padding: 0.8rem 1rem;
+  border-bottom: 2px solid rgba(240,197,91,0.2);
+  font-family: 'JetBrains Mono', monospace; font-size: 0.8rem;
+  letter-spacing: 0.5px; text-transform: uppercase;
+}
+.styled-table tbody td { padding: 0.7rem 1rem; border-bottom: 1px solid var(--border-color); color: var(--text-secondary); }
+.styled-table tbody tr:hover { background: rgba(255,255,255,0.02); }
+
+/* ── Level Badges ── */
+.level-badge {
+  display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.35rem 1rem;
+  border-radius: 50px; font-size: 0.8rem; font-weight: 600; letter-spacing: 0.5px; margin-bottom: 1rem;
+}
+.level-simple { background: var(--accent-emerald-dim); color: var(--accent-emerald); border: 1px solid rgba(16,185,129,0.2); }
+.level-medium { background: var(--accent-blue-dim); color: var(--accent-blue); border: 1px solid rgba(59,130,246,0.2); }
+.level-advanced { background: var(--accent-purple-dim); color: var(--accent-purple); border: 1px solid rgba(167,139,250,0.2); }
+.level-complex { background: var(--accent-rose-dim); color: var(--accent-rose); border: 1px solid rgba(244,63,94,0.2); }
+.level-real { background: var(--accent-gold-dim); color: var(--accent-gold); border: 1px solid rgba(240,197,91,0.2); }
+
+/* ── Steps ── */
+.process-steps { display: flex; flex-direction: column; gap: 1rem; margin: 2rem 0; }
+.process-step {
+  display: flex; align-items: flex-start; gap: 1.25rem; padding: 1.5rem;
+  background: var(--bg-card); border: 1px solid var(--border-color);
+  border-radius: var(--radius); transition: var(--transition);
+}
+.process-step:hover { border-color: var(--border-glow); transform: translateX(4px); }
+.step-num {
+  width: 42px; height: 42px; min-width: 42px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 1rem;
+  background: var(--accent-gold-dim); color: var(--accent-gold);
+  border: 1px solid rgba(240,197,91,0.2);
+}
+.step-content h4 { font-family: 'Playfair Display', serif; font-size: 1.1rem; margin-bottom: 0.4rem; }
+.step-content p { color: var(--text-secondary); font-size: 0.92rem; }
+
+/* ── Callout ── */
+.callout {
+  border-radius: var(--radius); padding: 1.5rem 1.5rem 1.5rem 3.5rem;
+  margin: 1.5rem 0; position: relative; border-left: 3px solid;
+}
+.callout::before { position: absolute; left: 1rem; top: 1.4rem; font-size: 1.2rem; }
+.callout-warning { background: var(--accent-orange-dim); border-color: var(--accent-orange); }
+.callout-warning::before { content: '⚠️'; }
+.callout-tip { background: var(--accent-teal-dim); border-color: var(--accent-teal); }
+.callout-tip::before { content: '✅'; }
+.callout-info { background: var(--accent-blue-dim); border-color: var(--accent-blue); }
+.callout-info::before { content: 'ℹ️'; }
+.callout-key { background: var(--accent-gold-dim); border-color: var(--accent-gold); }
+.callout-key::before { content: '🔑'; }
+.callout h4 { font-weight: 700; margin-bottom: 0.3rem; }
+.callout p { color: var(--text-secondary); font-size: 0.92rem; }
+
+/* ── Misc ── */
+ul.clean-list { list-style: none; padding: 0; }
+ul.clean-list li { padding: 0.4rem 0 0.4rem 1.5rem; position: relative; color: var(--text-secondary); }
+ul.clean-list li::before { content: '→'; position: absolute; left: 0; color: var(--accent-gold); font-weight: 600; }
+.tag-row { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0.75rem 0; }
+.tag { display: inline-block; padding: 0.2rem 0.7rem; border-radius: 50px; font-size: 0.75rem; font-weight: 600; border: 1px solid; }
+.tag-gold { background: var(--accent-gold-dim); color: var(--accent-gold); border-color: rgba(240,197,91,0.2); }
+.tag-blue { background: var(--accent-blue-dim); color: var(--accent-blue); border-color: rgba(59,130,246,0.2); }
+.tag-teal { background: var(--accent-teal-dim); color: var(--accent-teal); border-color: rgba(20,184,166,0.2); }
+.tag-purple { background: var(--accent-purple-dim); color: var(--accent-purple); border-color: rgba(167,139,250,0.2); }
+.tag-rose { background: var(--accent-rose-dim); color: var(--accent-rose); border-color: rgba(244,63,94,0.2); }
+.flow-row { display: flex; align-items: center; justify-content: center; gap: 0.5rem; flex-wrap: wrap; margin: 1.5rem 0; }
+.flow-box { padding: 0.6rem 1.2rem; border-radius: 8px; font-size: 0.85rem; font-weight: 600; border: 1px solid; }
+.flow-arrow { color: var(--accent-gold); font-size: 1.2rem; }
+.comparison-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin: 2rem 0; }
+.complexity-line { display: flex; align-items: center; justify-content: space-between; margin: 2rem 0; position: relative; padding: 0 1rem; }
+.complexity-line::before { content: ''; position: absolute; top: 50%; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--accent-emerald), var(--accent-blue), var(--accent-purple), var(--accent-rose), var(--accent-gold)); transform: translateY(-50%); z-index: 0; }
+.complexity-node { position: relative; z-index: 1; text-align: center; }
+.complexity-circle { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; margin: 0 auto 0.4rem; }
+.complexity-label { font-size: 0.72rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+
+/* ── Q&A ── */
+.qa-item { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius); margin-bottom: 1rem; overflow: hidden; transition: var(--transition); }
+.qa-question { padding: 1.25rem 1.5rem; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 1rem; font-weight: 600; font-size: 1rem; transition: var(--transition); }
+.qa-question:hover { background: rgba(255,255,255,0.02); }
+.qa-question .q-icon { width: 28px; height: 28px; min-width: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; background: var(--accent-gold-dim); color: var(--accent-gold); font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; font-weight: 700; }
+.qa-toggle { transition: transform 0.3s; color: var(--text-muted); }
+.qa-item.open .qa-toggle { transform: rotate(180deg); }
+.qa-answer { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }
+.qa-item.open .qa-answer { max-height: 1200px; }
+.qa-answer-inner { padding: 0 1.5rem 1.5rem; color: var(--text-secondary); line-height: 1.8; border-top: 1px solid var(--border-color); padding-top: 1.25rem; }
+
+/* ── Exercise Box ── */
+.exercise-box {
+  background: linear-gradient(135deg, rgba(59,130,246,0.08), rgba(20,184,166,0.05));
+  border: 1px solid rgba(59,130,246,0.2); border-radius: var(--radius-lg);
+  padding: 2rem; margin: 1.5rem 0; position: relative;
+}
+.exercise-box::before { content: '🏋️'; position: absolute; top: -14px; left: 24px; font-size: 1.5rem; background: var(--bg-primary); padding: 0 0.5rem; }
+.exercise-box .exercise-title { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 700; color: var(--accent-blue); margin-bottom: 0.5rem; }
+.exercise-box .exercise-difficulty { font-size: 0.8rem; font-weight: 600; margin-bottom: 0.75rem; }
+.exercise-box p, .exercise-box li { color: var(--text-secondary); line-height: 1.8; }
+
+/* ── Cheat Sheet Table ── */
+.cheat-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+.cheat-table td, .cheat-table th { padding: 0.6rem 0.8rem; border: 1px solid var(--border-color); }
+.cheat-table th { background: var(--accent-gold-dim); color: var(--accent-gold); font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; text-align: left; }
+.cheat-table td { color: var(--text-secondary); }
+.cheat-table td:first-child { color: var(--text-primary); font-weight: 600; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; }
+
+/* ── Footer ── */
+.footer { padding: 4rem 2rem 2rem; border-top: 1px solid var(--border-color); text-align: center; }
+.footer-links { display: flex; gap: 1.5rem; justify-content: center; margin-bottom: 1.5rem; flex-wrap: wrap; }
+.footer-links a { color: var(--text-secondary); text-decoration: none; font-size: 0.9rem; padding: 0.4rem 1rem; border-radius: 6px; border: 1px solid var(--border-color); transition: var(--transition); }
+.footer-links a:hover { color: var(--accent-gold); border-color: rgba(240,197,91,0.3); background: var(--accent-gold-dim); }
+.footer-credit { color: var(--text-muted); font-size: 0.85rem; margin-top: 1rem; }
+
+/* ── Toc sidebar ── */
+.toc-sidebar { position: fixed; right: 1.5rem; top: 50%; transform: translateY(-50%); z-index: 100; display: flex; flex-direction: column; gap: 6px; }
+.toc-dot { width: 10px; height: 10px; border-radius: 50%; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); transition: var(--transition); cursor: pointer; }
+.toc-dot:hover, .toc-dot.active { background: var(--accent-gold); border-color: var(--accent-gold); box-shadow: 0 0 10px rgba(240,197,91,0.3); transform: scale(1.3); }
+
+/* ── Animations ── */
+@keyframes fadeSlideDown { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ── Responsive ── */
+@media (max-width: 1100px) {
+  .nav-links { display: none; }
+  .hamburger { display: flex; }
+  .mobile-menu { display: block; }
+}
+@media (max-width: 768px) {
+  .top-nav { padding: 0 1rem; }
+  .section { padding: 3rem 1rem; }
+  .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+  .comparison-grid { grid-template-columns: 1fr; }
+  .hero { padding: 5rem 1.5rem 3rem; }
+}
+@media (min-width: 1101px) {
+  .hamburger { display: none; }
+  .mobile-menu { display: none !important; }
+}
+@media (max-width: 1024px) { .toc-sidebar { display: none; } }
+@media (min-width: 1025px) { .main-content { padding-right: 3rem; } }
+</style>
+</head>
+<body>
+
+<!-- ═══ NAV — Grouped dropdowns on desktop, hamburger slide-out on mobile ═══ -->
+<nav class="top-nav">
+  <div class="nav-brand">⬡ Kimball Architecture</div>
+
+  <!-- Desktop nav with dropdowns -->
+  <div class="nav-links" id="mainNav">
+    <span class="nav-item" data-target="hero">Home</span>
+
+    <div class="nav-dropdown">
+      <span class="nav-item">Foundations</span>
+      <div class="nav-dropdown-menu">
+        <div class="dropdown-label">Learn the Basics</div>
+        <span class="nav-sub-item" data-target="what-is-kimball">What Is Kimball</span>
+        <span class="nav-sub-item" data-target="core-concepts">Core Concepts</span>
+        <span class="nav-sub-item" data-target="four-step">4-Step Design Process</span>
+      </div>
+    </div>
+
+    <div class="nav-dropdown">
+      <span class="nav-item">Comparisons</span>
+      <div class="nav-dropdown-menu">
+        <div class="dropdown-label">Architecture Face-Offs</div>
+        <span class="nav-sub-item" data-target="kimball-vs-inmon">Kimball vs. Inmon</span>
+        <span class="nav-sub-item" data-target="kimball-vs-medallion">Kimball vs. Medallion</span>
+        <span class="nav-sub-item" data-target="pros-cons">Pros &amp; Cons</span>
+      </div>
+    </div>
+
+    <div class="nav-dropdown">
+      <span class="nav-item">Schemas</span>
+      <div class="nav-dropdown-menu">
+        <div class="dropdown-label">Modeling Patterns</div>
+        <span class="nav-sub-item" data-target="star-schema">Star Schema</span>
+        <span class="nav-sub-item" data-target="snowflake-schema">Snowflake Schema</span>
+        <span class="nav-sub-item" data-target="scd">Slowly Changing Dims</span>
+      </div>
+    </div>
+
+    <div class="nav-dropdown">
+      <span class="nav-item">Examples</span>
+      <div class="nav-dropdown-menu">
+        <div class="dropdown-label">Simple → Complex</div>
+        <span class="nav-sub-item" data-target="simple">☕ Coffee Shop</span>
+        <span class="nav-sub-item" data-target="medium">💻 SaaS Platform</span>
+        <span class="nav-sub-item" data-target="advanced">🏬 Multi-Channel Retail</span>
+        <span class="nav-sub-item" data-target="complex">🏥 Healthcare Claims</span>
+        <span class="nav-sub-item" data-target="ecommerce">🛒 E-Commerce Case Study</span>
+      </div>
+    </div>
+
+    <div class="nav-dropdown">
+      <span class="nav-item">Practical</span>
+      <div class="nav-dropdown-menu">
+        <div class="dropdown-label">Apply It</div>
+        <span class="nav-sub-item" data-target="dbt-impl">dbt Implementation</span>
+        <span class="nav-sub-item" data-target="naming">Naming Conventions</span>
+        <span class="nav-sub-item" data-target="testing">Testing &amp; Quality</span>
+        <span class="nav-sub-item" data-target="exercises">Hands-On Exercises</span>
+      </div>
+    </div>
+
+    <div class="nav-dropdown">
+      <span class="nav-item">Reference</span>
+      <div class="nav-dropdown-menu">
+        <div class="dropdown-label">Quick Access</div>
+        <span class="nav-sub-item" data-target="best-practices">Best Practices</span>
+        <span class="nav-sub-item" data-target="cheatsheet">Cheat Sheet</span>
+        <span class="nav-sub-item" data-target="qa">Q&amp;A (25 Questions)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hamburger button (visible ≤1100px) -->
+  <button class="hamburger" id="hamburgerBtn" aria-label="Toggle menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- Mobile slide-out menu -->
+<div class="mobile-menu" id="mobileMenu">
+  <div class="mobile-menu-group">
+    <div class="mobile-menu-label">Home</div>
+    <span class="mobile-menu-item" data-target="hero">🏠 Home</span>
+  </div>
+  <div class="mobile-menu-group">
+    <div class="mobile-menu-label">Foundations</div>
+    <span class="mobile-menu-item" data-target="what-is-kimball">What Is Kimball</span>
+    <span class="mobile-menu-item" data-target="core-concepts">Core Concepts</span>
+    <span class="mobile-menu-item" data-target="four-step">4-Step Design Process</span>
+  </div>
+  <div class="mobile-menu-group">
+    <div class="mobile-menu-label">Comparisons</div>
+    <span class="mobile-menu-item" data-target="kimball-vs-inmon">Kimball vs. Inmon</span>
+    <span class="mobile-menu-item" data-target="kimball-vs-medallion">Kimball vs. Medallion</span>
+    <span class="mobile-menu-item" data-target="pros-cons">Pros &amp; Cons</span>
+  </div>
+  <div class="mobile-menu-group">
+    <div class="mobile-menu-label">Schemas &amp; Patterns</div>
+    <span class="mobile-menu-item" data-target="star-schema">Star Schema</span>
+    <span class="mobile-menu-item" data-target="snowflake-schema">Snowflake Schema</span>
+    <span class="mobile-menu-item" data-target="scd">Slowly Changing Dimensions</span>
+  </div>
+  <div class="mobile-menu-group">
+    <div class="mobile-menu-label">Examples (Simple → Complex)</div>
+    <span class="mobile-menu-item" data-target="simple">☕ Coffee Shop</span>
+    <span class="mobile-menu-item" data-target="medium">💻 SaaS Platform</span>
+    <span class="mobile-menu-item" data-target="advanced">🏬 Multi-Channel Retail</span>
+    <span class="mobile-menu-item" data-target="complex">🏥 Healthcare Claims</span>
+    <span class="mobile-menu-item" data-target="ecommerce">🛒 E-Commerce Case Study</span>
+  </div>
+  <div class="mobile-menu-group">
+    <div class="mobile-menu-label">Practical</div>
+    <span class="mobile-menu-item" data-target="dbt-impl">dbt Implementation</span>
+    <span class="mobile-menu-item" data-target="naming">Naming Conventions</span>
+    <span class="mobile-menu-item" data-target="testing">Testing &amp; Quality</span>
+    <span class="mobile-menu-item" data-target="exercises">Hands-On Exercises</span>
+  </div>
+  <div class="mobile-menu-group">
+    <div class="mobile-menu-label">Reference</div>
+    <span class="mobile-menu-item" data-target="best-practices">Best Practices</span>
+    <span class="mobile-menu-item" data-target="cheatsheet">Cheat Sheet</span>
+    <span class="mobile-menu-item" data-target="qa">Q&amp;A (25 Questions)</span>
+  </div>
+</div>
+
+<div class="progress-container"><div class="progress-bar" id="progressBar"></div></div>
+<div class="toc-sidebar" id="tocSidebar"></div>
+
+<div class="main-content">
+
+<!-- ═══════════ HERO ═══════════ -->
+<section class="hero" id="hero">
+  <div class="hero-content">
+    <div class="hero-badge">AI Catalyst Cohort — Data Architecture Deep Dive</div>
+    <h1>Mastering <span class="highlight">Kimball's</span> Dimensional Modeling</h1>
+    <p class="subtitle">
+      The definitive guide to building analytics-ready data warehouses. From foundational concepts and relatable analogies to real-world e-commerce implementations and hands-on exercises — everything you need to think dimensionally and <strong>apply it on Day 1</strong>.
+    </p>
+    <div class="hero-meta">
+      <div class="hero-meta-item"><div class="icon" style="background:var(--accent-gold-dim);color:var(--accent-gold);">📖</div><span>22 Sections</span></div>
+      <div class="hero-meta-item"><div class="icon" style="background:var(--accent-blue-dim);color:var(--accent-blue);">🎯</div><span>5 Complexity Levels</span></div>
+      <div class="hero-meta-item"><div class="icon" style="background:var(--accent-teal-dim);color:var(--accent-teal);">🏗️</div><span>Real Case Study</span></div>
+      <div class="hero-meta-item"><div class="icon" style="background:var(--accent-purple-dim);color:var(--accent-purple);">🛠️</div><span>dbt + Exercises</span></div>
+      <div class="hero-meta-item"><div class="icon" style="background:var(--accent-rose-dim);color:var(--accent-rose);">❓</div><span>25+ Q&A</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ 01 — WHAT IS KIMBALL ═══════════ -->
+<section class="section" id="what-is-kimball">
+  <div class="section-header">
+    <div class="section-number">Section 01</div>
+    <h2 class="section-title">What Is Kimball Architecture?</h2>
+    <div class="section-divider"></div>
+    <p class="section-subtitle">Ralph Kimball's bottom-up approach to data warehousing — one business process at a time.</p>
+  </div>
+  <div class="grid-2">
+    <div class="card gold">
+      <div class="card-icon" style="background:var(--accent-gold-dim);color:var(--accent-gold);">🏛️</div>
+      <h3>The Origin Story</h3>
+      <p>Ralph Kimball published <strong>"The Data Warehouse Toolkit"</strong> in 1996 and changed how organizations model analytical data. Rather than forcing users to navigate complex normalized structures, Kimball proposed organizing data around <em>business processes</em> using intuitive dimensional models.</p>
+      <p style="margin-top:0.75rem;">His philosophy: <strong>"The data warehouse is only as good as the queries it enables."</strong></p>
+    </div>
+    <div class="card blue">
+      <div class="card-icon" style="background:var(--accent-blue-dim);color:var(--accent-blue);">🧠</div>
+      <h3>The Core Philosophy</h3>
+      <ul class="clean-list">
+        <li><strong>Bottom-up approach:</strong> Build one data mart at a time, each focused on a single business process</li>
+        <li><strong>Business process-centric:</strong> Model around what the business <em>does</em>, not how IT stores data</li>
+        <li><strong>Conformed dimensions:</strong> Share common vocabularies across marts for consistency</li>
+        <li><strong>User accessibility:</strong> Star schemas are intuitive — users can query them directly</li>
+        <li><strong>Query performance:</strong> Denormalized structures minimize joins and maximize speed</li>
+      </ul>
+    </div>
+  </div>
+  <div class="analogy-box">
+    <div class="analogy-title">Analogy — The IKEA Showroom</div>
+    <p>You don't walk into a giant warehouse of raw lumber and screws (that's normalized/Inmon-style). Instead, IKEA gives you <strong>fully assembled showrooms</strong> — a living room, a kitchen, a bedroom — each a self-contained, easy-to-browse display. That's Kimball: each showroom is a <strong>data mart</strong> (star schema), focused on a single area, designed so anyone can walk in and immediately understand what's there. The "conformed dimensions" are the standard product catalog and price tags that work identically across every showroom.</p>
+  </div>
+  <div class="callout callout-key">
+    <h4>Key Takeaway</h4>
+    <p>Kimball doesn't boil the ocean. Start with the highest-priority business process, model it as a star schema, deliver value fast, then expand by adding more stars — all connected via shared (conformed) dimensions.</p>
+  </div>
+</section>
+
+<!-- ═══════════ 02 — CORE CONCEPTS ═══════════ -->
+<section class="section" id="core-concepts">
+  <div class="section-header">
+    <div class="section-number">Section 02</div>
+    <h2 class="section-title">Core Concepts &amp; Building Blocks</h2>
+    <div class="section-divider"></div>
+    <p class="section-subtitle">The essential vocabulary — facts, dimensions, grains, and keys.</p>
+  </div>
+  <div class="grid-3">
+    <div class="card gold">
+      <div class="card-icon" style="background:var(--accent-gold-dim);color:var(--accent-gold);">📊</div>
+      <h3>Fact Tables</h3>
+      <p>The <strong>center of the star</strong>. Store the quantitative, measurable events of a business process.</p>
+      <ul class="clean-list" style="margin-top:0.75rem;">
+        <li><strong>Grain:</strong> One row per event (e.g., one line item per order)</li>
+        <li><strong>Measures:</strong> Numeric values you aggregate — revenue, quantity, discount</li>
+        <li><strong>Foreign keys:</strong> Pointers to every dimension table</li>
+        <li>Typically the <strong>largest table</strong> — millions to billions of rows</li>
+        <li>Usually append-only; historical records rarely change</li>
+      </ul>
+      <div class="tag-row">
+        <span class="tag tag-gold">Additive</span>
+        <span class="tag tag-gold">Semi-Additive</span>
+        <span class="tag tag-gold">Non-Additive</span>
+      </div>
+    </div>
+    <div class="card blue">
+      <div class="card-icon" style="background:var(--accent-blue-dim);color:var(--accent-blue);">📦</div>
+      <h3>Dimension Tables</h3>
+      <p>The <strong>points of the star</strong>. Provide the descriptive context — who, what, where, when, why, how.</p>
+      <ul class="clean-list" style="margin-top:0.75rem;">
+        <li><strong>Attributes:</strong> Textual descriptions for filtering, grouping, labeling</li>
+        <li><strong>Surrogate keys:</strong> System-generated integer PKs (not business keys)</li>
+        <li><strong>Wide and flat:</strong> Dozens of columns, denormalized for ease</li>
+        <li><strong>Few rows:</strong> Typically thousands to low millions</li>
+        <li>Change slowly over time (handled by SCDs)</li>
+      </ul>
+      <div class="tag-row">
+        <span class="tag tag-blue">Customer</span>
+        <span class="tag tag-blue">Product</span>
+        <span class="tag tag-blue">Date</span>
+        <span class="tag tag-blue">Geography</span>
+      </div>
+    </div>
+    <div class="card teal">
+      <div class="card-icon" style="background:var(--accent-teal-dim);color:var(--accent-teal);">🔑</div>
+      <h3>Grain, Keys &amp; Relationships</h3>
+      <p>The <strong>structural glue</strong>. Getting the grain right is the single most important design decision.</p>
+      <ul class="clean-list" style="margin-top:0.75rem;">
+        <li><strong>Grain:</strong> The most atomic level of detail in the fact table</li>
+        <li><strong>Surrogate key (SK):</strong> Warehouse-assigned integer PK for dimensions</li>
+        <li><strong>Natural/business key (NK):</strong> The source-system identifier</li>
+        <li><strong>Degenerate dimension:</strong> A dim with no table — just a FK in the fact (e.g., order_number)</li>
+        <li><strong>Conformed dimension:</strong> Shared across multiple fact tables</li>
+      </ul>
+    </div>
+  </div>
+  <div class="analogy-box">
+    <div class="analogy-title">Analogy — The Restaurant Receipt</div>
+    <p>Your dinner receipt: the <strong>fact table</strong> is each line item — "1× Margherita Pizza — €12.00". The <strong>measures</strong> are quantity (1) and price (€12.00). The <strong>dimensions</strong> are: <em>which restaurant</em>, <em>which waiter</em>, <em>what date & time</em>, <em>what dish</em>, <em>who paid</em>. The <strong>grain</strong> is "one line item on one receipt at one restaurant". The receipt number itself is a <strong>degenerate dimension</strong> — it lives directly in the fact row.</p>
+  </div>
+  <h3 style="font-family:'Playfair Display',serif;font-size:1.5rem;margin:3rem 0 1.5rem;">Three Types of Fact Tables</h3>
+  <div class="grid-3">
+    <div class="card orange">
+      <h3>Transaction Facts</h3>
+      <p>One row per <strong>event</strong> at a point in time. Most common and most granular.</p>
+      <p style="margin-top:0.5rem;"><strong>Example:</strong> Each retail sale, each click, each call.</p>
+      <p style="margin-top:0.5rem;color:var(--accent-orange);font-weight:600;">Measures: fully additive (revenue, quantity, cost)</p>
+    </div>
+    <div class="card purple">
+      <h3>Periodic Snapshot Facts</h3>
+      <p>One row per <strong>time period</strong>, summarizing cumulative state at regular intervals.</p>
+      <p style="margin-top:0.5rem;"><strong>Example:</strong> Monthly account balance, weekly inventory levels.</p>
+      <p style="margin-top:0.5rem;color:var(--accent-purple);font-weight:600;">Measures: often semi-additive (can't sum across time)</p>
+    </div>
+    <div class="card rose">
+      <h3>Accumulating Snapshot Facts</h3>
+      <p>One row per <strong>lifecycle instance</strong>, updated as milestones are reached.</p>
+      <p style="margin-top:0.5rem;"><strong>Example:</strong> Order lifecycle (ordered → shipped → delivered → returned).</p>
+      <p style="margin-top:0.5rem;color:var(--accent-rose);font-weight:600;">Measures: mix of additive + date stamps per milestone</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ 03 — KIMBALL vs INMON ═══════════ -->
+<section class="section" id="kimball-vs-inmon">
+  <div class="section-header">
+    <div class="section-number">Section 03</div>
+    <h2 class="section-title">Kimball vs. Inmon — The Great Debate</h2>
+    <div class="section-divider"></div>
+    <p class="section-subtitle">Same goal, radically different philosophies.</p>
+  </div>
+  <div class="comparison-grid">
+    <div class="card gold card-wide">
+      <h3>⭐ Kimball (Bottom-Up)</h3>
+      <ul class="clean-list">
+        <li><strong>Approach:</strong> Build individual data marts first; warehouse emerges from connected marts</li>
+        <li><strong>Schema:</strong> Star/snowflake schemas</li>
+        <li><strong>Speed to value:</strong> Fast — usable mart in weeks</li>
+        <li><strong>Normalization:</strong> Denormalized dimensions for query speed</li>
+        <li><strong>Audience:</strong> Business users can self-serve</li>
+        <li><strong>Best for:</strong> Fast ROI, agile teams, BI-heavy workloads</li>
+      </ul>
+    </div>
+    <div class="card purple card-wide">
+      <h3>🏗️ Inmon (Top-Down)</h3>
+      <ul class="clean-list">
+        <li><strong>Approach:</strong> Build centralized normalized EDW first; marts are derived</li>
+        <li><strong>Schema:</strong> 3NF (Third Normal Form)</li>
+        <li><strong>Speed to value:</strong> Slow — full enterprise model first</li>
+        <li><strong>Normalization:</strong> Highly normalized to eliminate redundancy</li>
+        <li><strong>Audience:</strong> IT/data engineers; business needs derived layers</li>
+        <li><strong>Best for:</strong> Strict governance, regulated industries</li>
+      </ul>
+    </div>
+  </div>
+  <div class="analogy-box">
+    <div class="analogy-title">Analogy — Building a City</div>
+    <p><strong>Inmon</strong> = A central city planner who drafts the entire blueprint — roads, sewage, zoning — before laying a single brick. Nothing opens until the master plan is done. <strong>Kimball</strong> = Building individual neighborhoods people can move into immediately, each with shops and parks, but all sharing the same road naming system and postal code format.</p>
+  </div>
+  <div class="callout callout-info">
+    <h4>Modern Reality</h4>
+    <p>Most modern data stacks (dbt, Snowflake, BigQuery) use a <strong>hybrid approach</strong>: raw data lands in staging (ELT), gets cleaned into a normalized-ish intermediate layer, and is then modeled into Kimball-style star schemas for the analytics/BI layer. The best of both worlds.</p>
+  </div>
+</section>
+
+<!-- ═══════════ 21 — KIMBALL vs MEDALLION ═══════════ -->
+<section class="section" id="kimball-vs-medallion">
+  <div class="section-header">
+    <div class="section-number">Section 04</div>
+    <h2 class="section-title">Kimball vs. Medallion Architecture</h2>
+    <div class="section-divider"></div>
+    <p class="section-subtitle">Two dominant paradigms in modern data — competitors or complements?</p>
+  </div>
+
+  <div class="grid-2">
+    <div class="card gold card-wide">
+      <div class="card-icon" style="background:var(--accent-gold-dim);color:var(--accent-gold);">⭐</div>
+      <h3>Kimball Dimensional Modeling</h3>
+      <ul class="clean-list">
+        <li><strong>Focus:</strong> How data is <em>modeled</em> for analytics (star schemas, conformed dims)</li>
+        <li><strong>Origin:</strong> Ralph Kimball, 1996 — "The Data Warehouse Toolkit"</li>
+        <li><strong>Core unit:</strong> Star schema (fact + dimension tables)</li>
+        <li><strong>Methodology:</strong> 4-step process (process → grain → dims → facts)</li>
+        <li><strong>Audience:</strong> Business analysts, BI dashboards</li>
+        <li><strong>Key question it answers:</strong> "How should we <em>structure</em> the final analytical tables?"</li>
+      </ul>
+    </div>
+    <div class="card purple card-wide">
+      <div class="card-icon" style="background:var(--accent-purple-dim);color:var(--accent-purple);">🥇</div>
+      <h3>Medallion Architecture (Bronze / Silver / Gold)</h3>
+      <ul class="clean-list">
+        <li><strong>Focus:</strong> How data <em>flows and matures</em> through processing stages</li>
+        <li><strong>Origin:</strong> Databricks, ~2020 — Popularized with Delta Lake / Lakehouse</li>
+        <li><strong>Core unit:</strong> Three layers (Bronze → Silver → Gold)</li>
+        <li><strong>Methodology:</strong> Progressive refinement of data quality</li>
+        <li><strong>Audience:</strong> Data engineers, ML engineers, and analysts</li>
+        <li><strong>Key question it answers:</strong> "How should we <em>organize the flow</em> from raw to refined?"</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="diagram-container" style="margin-top:2rem;">
+    <div class="diagram-title">Medallion Layers Explained</div>
+    <div class="flow-row" style="margin:2rem 0;">
+      <div class="flow-box" style="background:var(--accent-orange-dim);color:var(--accent-orange);border-color:rgba(249,115,22,0.3);">
+        <strong>🥉 Bronze</strong><br><span style="font-size:0.78rem;">Raw ingestion. Exact copy of source data. No transforms. Append-only. Full audit trail.</span>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box" style="background:var(--accent-blue-dim);color:var(--accent-blue);border-color:rgba(59,130,246,0.3);">
+        <strong>🥈 Silver</strong><br><span style="font-size:0.78rem;">Cleaned, deduplicated, standardized. Normalized or lightly modeled. Business rules applied.</span>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box" style="background:var(--accent-gold-dim);color:var(--accent-gold);border-color:rgba(240,197,91,0.3);">
+        <strong>🥇 Gold</strong><br><span style="font-size:0.78rem;">Business-ready. Aggregated, modeled for consumption. BI dashboards, ML features.</span>
+      </div>
+    </div>
+  </div>
+
+  <h4 style="font-family:'Playfair Display',serif;margin:2.5rem 0 1.5rem;font-size:1.4rem;">Side-by-Side Comparison</h4>
+  <div class="card blue card-wide">
+    <table class="styled-table">
+      <thead>
+        <tr><th>Aspect</th><th>Kimball</th><th>Medallion</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>What it defines</strong></td><td>Data <em>modeling</em> methodology</td><td>Data <em>flow / pipeline</em> pattern</td></tr>
+        <tr><td><strong>Scope</strong></td><td>Final analytical layer only</td><td>Entire pipeline (raw → consumption)</td></tr>
+        <tr><td><strong>Layers</strong></td><td>Staging → Intermediate → Marts</td><td>Bronze → Silver → Gold</td></tr>
+        <tr><td><strong>Gold layer modeling</strong></td><td>⭐ Star schemas (fct_ + dim_)</td><td>Flexible — could be star, OBT, wide tables, or ML features</td></tr>
+        <tr><td><strong>Data quality approach</strong></td><td>Conformed dimensions + tests</td><td>Progressive refinement across layers</td></tr>
+        <tr><td><strong>SCD handling</strong></td><td>Explicit (Type 1, 2, 3, 6)</td><td>Time travel / versioning via Delta Lake</td></tr>
+        <tr><td><strong>Best for</strong></td><td>BI / analytics / dashboards</td><td>Mixed workloads (BI + ML + streaming)</td></tr>
+        <tr><td><strong>Storage paradigm</strong></td><td>Data warehouse (Snowflake, BQ)</td><td>Data lakehouse (Databricks, Delta)</td></tr>
+        <tr><td><strong>Schema enforcement</strong></td><td>Schema-on-write (strict)</td><td>Schema-on-read at Bronze, stricter at Gold</td></tr>
+        <tr><td><strong>Handles unstructured data</strong></td><td>No — structured / tabular only</td><td>Yes — images, logs, JSON, Parquet at Bronze</td></tr>
+        <tr><td><strong>Community/tooling</strong></td><td>dbt, Snowflake, BigQuery, Looker</td><td>Databricks, Delta Lake, Apache Spark</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout callout-key" style="margin-top:2rem;">
+    <h4>🔑 The Key Insight: They Solve Different Problems</h4>
+    <p>Kimball answers: <strong>"How should the final tables look?"</strong> Medallion answers: <strong>"How should data flow from raw to refined?"</strong> They operate at different levels of the stack. The best modern architectures use <strong>both together</strong> — Medallion for pipeline organization, Kimball for the Gold layer's data model.</p>
+  </div>
+
+  <h4 style="font-family:'Playfair Display',serif;margin:2.5rem 0 1.5rem;font-size:1.4rem;">How They Work Together — The Best of Both Worlds</h4>
+  <div class="diagram-container">
+    <div class="diagram-title">Combined Architecture (Recommended)</div>
+    <div class="flow-row" style="margin:1.5rem 0;">
+      <div class="flow-box" style="background:var(--accent-orange-dim);color:var(--accent-orange);border-color:rgba(249,115,22,0.3);">
+        <strong>🥉 Bronze</strong><br><span style="font-size:0.78rem;">Raw / Staging<br>stg_shopify__orders</span>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box" style="background:var(--accent-blue-dim);color:var(--accent-blue);border-color:rgba(59,130,246,0.3);">
+        <strong>🥈 Silver</strong><br><span style="font-size:0.78rem;">Intermediate / Clean<br>int_orders__enriched</span>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box" style="background:var(--accent-gold-dim);color:var(--accent-gold);border-color:rgba(240,197,91,0.3);">
+        <strong>🥇 Gold = ⭐ Kimball Stars</strong><br><span style="font-size:0.78rem;">dim_customer + fct_order_lines<br>Star schemas for BI</span>
+      </div>
+    </div>
+    <p style="color:var(--text-secondary);font-size:0.9rem;margin-top:1rem;">Medallion provides the <em>pipeline structure</em>. Kimball provides the <em>modeling discipline</em> for the Gold layer.</p>
+  </div>
+
+  <div class="code-block" style="margin-top:1.5rem;">
+    <div class="code-label">dbt Project = Medallion + Kimball</div>
+<pre>
+<span class="cm">models/</span>
+<span class="cm">├── bronze/</span>               <span class="cm">← Medallion Bronze = dbt staging</span>
+<span class="cm">│   ├── stg_shopify__orders.sql</span>
+<span class="cm">│   └── stg_stripe__payments.sql</span>
+<span class="cm">├── silver/</span>               <span class="cm">← Medallion Silver = dbt intermediate</span>
+<span class="cm">│   ├── int_orders__enriched.sql</span>
+<span class="cm">│   └── int_customers__deduplicated.sql</span>
+<span class="cm">└── gold/</span>                 <span class="cm">← Medallion Gold = ⭐ KIMBALL STAR SCHEMAS</span>
+<span class="cm">    ├── dim_date.sql</span>
+<span class="cm">    ├── dim_customer.sql</span>         <span class="cm">← Conformed dimension (SCD Type 2)</span>
+<span class="cm">    ├── dim_product.sql</span>          <span class="cm">← Conformed dimension</span>
+<span class="cm">    ├── fct_order_lines.sql</span>      <span class="cm">← Transaction fact</span>
+<span class="cm">    └── fct_inventory_daily.sql</span>  <span class="cm">← Periodic snapshot fact</span>
+</pre>
+  </div>
+
+  <div class="grid-3" style="margin-top:2rem;">
+    <div class="card teal">
+      <h3>When to Use Kimball Alone</h3>
+      <ul class="clean-list">
+        <li>Cloud warehouse (Snowflake, BigQuery)</li>
+        <li>Primary consumers are BI/analysts</li>
+        <li>Structured, tabular data only</li>
+        <li>dbt-centric workflow</li>
+      </ul>
+    </div>
+    <div class="card purple">
+      <h3>When to Use Medallion Alone</h3>
+      <ul class="clean-list">
+        <li>Data lakehouse (Databricks, Delta Lake)</li>
+        <li>Heavy ML / data science workloads</li>
+        <li>Unstructured data (logs, images, JSON)</li>
+        <li>Gold layer doesn't need star schemas</li>
+      </ul>
+    </div>
+    <div class="card gold">
+      <h3>When to Combine Both ⭐</h3>
+      <ul class="clean-list">
+        <li>Modern analytics team (most teams!)</li>
+        <li>Mixed workloads: BI + ML</li>
+        <li>Need pipeline discipline AND modeling rigor</li>
+        <li>dbt + Snowflake / BigQuery / Databricks</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="analogy-box">
+    <div class="analogy-title">Analogy — Assembly Line vs. Product Design</div>
+    <p><strong>Medallion</strong> is the assembly line — it defines <em>how raw materials progress</em> through the factory: receiving dock (Bronze), quality inspection and cleaning (Silver), final assembly (Gold). <strong>Kimball</strong> is the product design blueprint — it defines <em>what the finished product looks like</em>: a star-shaped schema optimized for the end user. You need both: the best assembly line in the world produces junk without a good blueprint, and the best blueprint is useless without a manufacturing process to build it.</p>
+  </div>
+</section>
+
+<!-- ═══════════ 04 — PROS & CONS ═══════════ -->
+<section class="section" id="pros-cons">
+  <div class="section-header">
+    <div class="section-number">Section 05</div>
+    <h2 class="section-title">Pros &amp; Cons of Kimball Architecture</h2>
+    <div class="section-divider"></div>
+    <p class="section-subtitle">An honest evaluation — every architecture has tradeoffs. Knowing them upfront helps you make the right choice.</p>
+  </div>
+
+  <div class="comparison-grid">
+    <div class="card teal card-wide">
+      <h3 style="color:var(--accent-teal);">✅ Advantages</h3>
+      <ul class="clean-list">
+        <li><strong>Fast time-to-value:</strong> Deliver a usable data mart in weeks, not months. Business sees ROI immediately.</li>
+        <li><strong>Intuitive for business users:</strong> Star schemas are easy to understand — analysts write their own queries without deep SQL expertise.</li>
+        <li><strong>Blazing query performance:</strong> Denormalized dimensions + columnar databases = minimal joins, maximum scan speed. Ideal for interactive BI dashboards.</li>
+        <li><strong>Incremental delivery:</strong> Build one star at a time. No need to model the entire enterprise before shipping value.</li>
+        <li><strong>Conformed dimensions ensure consistency:</strong> Shared vocabularies (dim_customer, dim_date) across all marts eliminate the "which number is right?" problem.</li>
+        <li><strong>AI/LLM-friendly:</strong> Simple, descriptive schemas are ideal for text-to-SQL, semantic layers, and AI-powered analytics.</li>
+        <li><strong>Battle-tested at scale:</strong> 30+ years of proven methodology. Snowflake, BigQuery, Redshift are all optimized for star schemas.</li>
+        <li><strong>Excellent with dbt:</strong> The dbt project structure (staging → intermediate → marts) maps 1:1 to Kimball's methodology. Massive community support.</li>
+      </ul>
+    </div>
+    <div class="card rose card-wide">
+      <h3 style="color:var(--accent-rose);">⚠️ Disadvantages</h3>
+      <ul class="clean-list">
+        <li><strong>Redundant data in dimensions:</strong> Denormalization means repeating "Electronics" 50,000 times in dim_product. Storage cost is real (though cheap on modern warehouses).</li>
+        <li><strong>ETL complexity for SCDs:</strong> SCD Type 2 is powerful but operationally complex — managing surrogate keys, versioned rows, and date ranges requires careful engineering.</li>
+        <li><strong>Schema changes are costly:</strong> Adding a new dimension to an existing fact table means altering the fact, backfilling FKs, and updating all downstream dashboards.</li>
+        <li><strong>Not ideal for exploratory / ad-hoc ML:</strong> Data scientists often want wide, flat, raw datasets — star schemas add join overhead for non-BI workloads.</li>
+        <li><strong>Upfront design effort:</strong> The 4-step process and Bus Matrix require disciplined requirements gathering. Rushing this leads to rework.</li>
+        <li><strong>Risk of "siloed marts" without governance:</strong> Without enforcing conformed dimensions, teams build incompatible marts — exactly the problem Kimball set out to solve.</li>
+        <li><strong>Semi-additive measures trip people up:</strong> Account balances, inventory levels, and MRR are commonly mishandled, leading to incorrect reports.</li>
+        <li><strong>Less flexible for rapidly changing requirements:</strong> If the grain or business process definition changes frequently, refactoring a star schema is more painful than refactoring a normalized model.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="callout callout-info" style="margin-top:2rem;">
+    <h4>When Kimball Shines Brightest</h4>
+    <p>Kimball is the optimal choice when: (1) your primary consumers are <strong>BI dashboards and business analysts</strong>, (2) you want <strong>fast, iterative delivery</strong>, (3) your data team uses <strong>dbt + modern cloud warehouse</strong>, and (4) you value <strong>query performance and user self-service</strong> above all else. It's the dominant architecture in modern analytics for a reason.</p>
+  </div>
+
+  <div class="callout callout-warning">
+    <h4>When to Consider Alternatives</h4>
+    <p>If your primary workloads are ML model training, unstructured data processing, real-time event streaming, or you operate in a heavily regulated industry requiring strict audit trails on normalized data — <strong>a hybrid approach or lakehouse</strong> may serve you better. Most modern teams combine multiple paradigms.</p>
+  </div>
+
+  <div class="analogy-box">
+    <div class="analogy-title">Analogy — Restaurant Kitchen Layout</div>
+    <p>A Kimball star schema is like a <strong>well-organized restaurant kitchen</strong>: ingredients are pre-prepped and arranged at each station (mise en place = denormalized dimensions), so when an order comes in, the chef assembles the dish fast. The tradeoff? Setup takes time, and if the menu changes dramatically, you reorganize the entire kitchen. A normalized model is like storing everything in a raw pantry — maximally flexible, but every order requires finding and measuring each ingredient from scratch.</p>
+  </div>
+</section>
+
+<!-- ═══════════ 20 — FOUR-STEP PROCESS ═══════════ -->
+<section class="section" id="four-step">
+  <div class="section-header">
+    <div class="section-number">Section 06</div>
+    <h2 class="section-title">Kimball's 4-Step Design Process</h2>
+    <div class="section-divider"></div>
+    <p class="section-subtitle">Every dimensional model starts with these four sequential decisions.</p>
+  </div>
+  <div class="process-steps">
+    <div class="process-step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h4>Select the Business Process</h4>
+        <p>Identify the operational activity — a <strong>repeatable event</strong>: taking orders, processing claims, handling returns. Each produces a single fact table. Don't model a department; model what they <em>do</em>.</p>
+        <p style="margin-top:0.5rem;"><em style="color:var(--accent-gold);">Example:</em> "We want to analyze retail sales transactions."</p>
+      </div>
+    </div>
+    <div class="process-step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h4>Declare the Grain</h4>
+        <p>The <strong>most atomic level of detail</strong> each fact row represents. Always err toward the most granular grain — you can aggregate up, but never drill down past your grain.</p>
+        <p style="margin-top:0.5rem;"><em style="color:var(--accent-gold);">Example:</em> "One row per individual line item on a sales receipt."</p>
+      </div>
+    </div>
+    <div class="process-step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <h4>Identify the Dimensions</h4>
+        <p>Ask: <strong>"How do users want to slice, dice, filter, and group the facts?"</strong> Each answer becomes a dimension table.</p>
+        <p style="margin-top:0.5rem;"><em style="color:var(--accent-gold);">Example:</em> "By date, product, store, customer, cashier, and payment method."</p>
+      </div>
+    </div>
+    <div class="process-step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <h4>Identify the Facts (Measures)</h4>
+        <p>The <strong>numeric measurements</strong> from the process. Each must be true at the declared grain.</p>
+        <p style="margin-top:0.5rem;"><em style="color:var(--accent-gold);">Example:</em> "quantity_sold, unit_price, extended_price, discount_amount, net_revenue."</p>
+      </div>
+    </div>
+  </div>
+  <div class="analogy-box">
+    <div class="analogy-title">Analogy — Designing a Sports Scoreboard</div>
+    <p><strong>Step 1</strong>: We're tracking basketball games. <strong>Step 2</strong>: Each row = one shot attempt by one player in one game. <strong>Step 3</strong>: Player, Team, Arena, Game Date, Shot Type, Quarter. <strong>Step 4</strong>: points_scored, is_made, distance_from_basket, shot_clock_remaining. Now any analyst can answer "What's LeBron's 3-point percentage in away games during the 4th quarter?" with a simple GROUP BY.</p>
+  </div>
+</section>
+
+<!-- ═══════════ 21 — STAR SCHEMA ═══════════ -->
+<section class="section" id="star-schema">
+  <div class="section-header">
+    <div class="section-number">Section 07</div>
+    <h2 class="section-title">The Star Schema</h2>
+    <div class="section-divider"></div>
+    <p class="section-subtitle">Kimball's signature model — simple, intuitive, blazing fast.</p>
+  </div>
+  <div class="diagram-container">
+    <div class="diagram-title">Star Schema — Retail Sales Example</div>
+    <svg viewBox="0 0 700 500" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;">
+      <line x1="350" y1="250" x2="120" y2="80" stroke="rgba(240,197,91,0.3)" stroke-width="2" stroke-dasharray="6,4"/>
+      <line x1="350" y1="250" x2="580" y2="80" stroke="rgba(240,197,91,0.3)" stroke-width="2" stroke-dasharray="6,4"/>
+      <line x1="350" y1="250" x2="80" y2="350" stroke="rgba(240,197,91,0.3)" stroke-width="2" stroke-dasharray="6,4"/>
+      <line x1="350" y1="250" x2="620" y2="350" stroke="rgba(240,197,91,0.3)" stroke-width="2" stroke-dasharray="6,4"/>
+      <line x1="350" y1="250" x2="350" y2="460" stroke="rgba(240,197,91,0.3)" stroke-width="2" stroke-dasharray="6,4"/>
+      <rect x="265" y="195" width="170" height="110" rx="12" fill="#1a2234" stroke="#f0c55b" stroke-width="2.5"/>
+      <text x="350" y="222" text-anchor="middle" fill="#f0c55b" font-family="monospace" font-size="11" font-weight="700">FACT_SALES</text>
+      <line x1="275" y1="232" x2="425" y2="232" stroke="rgba(240,197,91,0.3)"/>
+      <text x="285" y="249" fill="#14b8a6" font-family="monospace" font-size="9">FK date_key</text>
+      <text x="285" y="263" fill="#14b8a6" font-family="monospace" font-size="9">FK product_key</text>
+      <text x="285" y="277" fill="#14b8a6" font-family="monospace" font-size="9">FK customer_key</text>
+      <text x="285" y="291" fill="#f43f5e" font-family="monospace" font-size="9">$ revenue, qty</text>
+      <rect x="40" y="30" width="160" height="100" rx="10" fill="#1a2234" stroke="#3b82f6" stroke-width="2"/>
+      <text x="120" y="55" text-anchor="middle" fill="#3b82f6" font-family="monospace" font-size="10" font-weight="700">DIM_DATE</text>
+      <line x1="50" y1="63" x2="190" y2="63" stroke="rgba(59,130,246,0.3)"/>
+      <text x="58" y="79" fill="#f0c55b" font-family="monospace" font-size="9">PK date_key</text>
+      <text x="58" y="93" fill="#94a3b8" font-family="monospace" font-size="9">full_date, month</text>
+      <text x="58" y="107" fill="#94a3b8" font-family="monospace" font-size="9">quarter, year</text>
+      <text x="58" y="121" fill="#94a3b8" font-family="monospace" font-size="9">is_weekend, is_holiday</text>
+      <rect x="500" y="30" width="160" height="100" rx="10" fill="#1a2234" stroke="#3b82f6" stroke-width="2"/>
+      <text x="580" y="55" text-anchor="middle" fill="#3b82f6" font-family="monospace" font-size="10" font-weight="700">DIM_PRODUCT</text>
+      <line x1="510" y1="63" x2="650" y2="63" stroke="rgba(59,130,246,0.3)"/>
+      <text x="518" y="79" fill="#f0c55b" font-family="monospace" font-size="9">PK product_key</text>
+      <text x="518" y="93" fill="#94a3b8" font-family="monospace" font-size="9">product_name, brand</text>
+      <text x="518" y="107" fill="#94a3b8" font-family="monospace" font-size="9">category, subcategory</text>
+      <text x="518" y="121" fill="#94a3b8" font-family="monospace" font-size="9">color, unit_price</text>
+      <rect x="10" y="300" width="150" height="100" rx="10" fill="#1a2234" stroke="#3b82f6" stroke-width="2"/>
+      <text x="85" y="325" text-anchor="middle" fill="#3b82f6" font-family="monospace" font-size="10" font-weight="700">DIM_STORE</text>
+      <line x1="20" y1="333" x2="150" y2="333" stroke="rgba(59,130,246,0.3)"/>
+      <text x="28" y="349" fill="#f0c55b" font-family="monospace" font-size="9">PK store_key</text>
+      <text x="28" y="363" fill="#94a3b8" font-family="monospace" font-size="9">store_name, city</text>
+      <text x="28" y="377" fill="#94a3b8" font-family="monospace" font-size="9">state, region</text>
+      <text x="28" y="391" fill="#94a3b8" font-family="monospace" font-size="9">sq_footage</text>
+      <rect x="540" y="300" width="155" height="100" rx="10" fill="#1a2234" stroke="#3b82f6" stroke-width="2"/>
+      <text x="617" y="325" text-anchor="middle" fill="#3b82f6" font-family="monospace" font-size="10" font-weight="700">DIM_CUSTOMER</text>
+      <line x1="550" y1="333" x2="685" y2="333" stroke="rgba(59,130,246,0.3)"/>
+      <text x="558" y="349" fill="#f0c55b" font-family="monospace" font-size="9">PK customer_key</text>
+      <text x="558" y="363" fill="#94a3b8" font-family="monospace" font-size="9">full_name, email</text>
+      <text x="558" y="377" fill="#94a3b8" font-family="monospace" font-size="9">segment, loyalty_tier</text>
+      <text x="558" y="391" fill="#94a3b8" font-family="monospace" font-size="9">city, country</text>
+      <rect x="270" y="410" width="160" height="85" rx="10" fill="#1a2234" stroke="#3b82f6" stroke-width="2"/>
+      <text x="350" y="435" text-anchor="middle" fill="#3b82f6" font-family="monospace" font-size="10" font-weight="700">DIM_PROMOTION</text>
+      <line x1="280" y1="443" x2="420" y2="443" stroke="rgba(59,130,246,0.3)"/>
+      <text x="288" y="459" fill="#f0c55b" font-family="monospace" font-size="9">PK promo_key</text>
+      <text x="288" y="473" fill="#94a3b8" font-family="monospace" font-size="9">promo_name, type</text>
+      <text x="288" y="487" fill="#94a3b8" font-family="monospace" font-size="9">discount_pct, channel</text>
+    </svg>
+  </div>
+  <div class="grid-2" style="margin-top:2rem;">
+    <div class="card teal"><h3>Why "Star"?</h3><p>Central fact table with dimension tables radiating outward — it looks like a star. <strong>At most one join</strong> to get from any dimension to the fact table. No cascading joins, no confusion.</p></div>
+    <div class="card gold"><h3>Performance Benefits</h3><p>Modern columnar databases (Snowflake, BigQuery, Redshift) scan fact tables at blazing speed, and small dimension tables fit comfortably in memory for hash joins. Denormalization trades minor storage for massive query performance.</p></div>
+  </div>
+</section>
+
+<!-- ═══════════ 20 — SNOWFLAKE SCHEMA ═══════════ -->
+<section class="section" id="snowflake-schema">
+  <div class="section-header">
+    <div class="section-number">Section 08</div>
+    <h2 class="section-title">The Snowflake Schema</h2>
+    <div class="section-divider"></div>
+    <p class="section-subtitle">When dimension tables are further normalized into sub-tables.</p>
+  </div>
+  <div class="grid-2">
+    <div class="card blue"><h3>What Makes It a "Snowflake"?</h3><p>A snowflake starts as a star but <strong>normalizes the dimensions</strong> — breaking out hierarchical data into separate tables. Instead of <code>brand</code> and <code>category</code> as columns in dim_product, you create separate <code>dim_brand</code> and <code>dim_category</code> tables. The result branches out like a snowflake.</p></div>
+    <div class="card purple"><h3>Tradeoffs</h3><table class="styled-table"><thead><tr><th>Aspect</th><th>Star</th><th>Snowflake</th></tr></thead><tbody><tr><td>Joins</td><td>Fewer</td><td>More</td></tr><tr><td>Query simplicity</td><td>Simpler</td><td>More complex</td></tr><tr><td>Storage</td><td>More</td><td>Less</td></tr><tr><td>Kimball's pick</td><td>✅ Preferred</td><td>⚠️ Sparingly</td></tr></tbody></table></div>
+  </div>
+  <div class="analogy-box">
+    <div class="analogy-title">Analogy — Your Contact Book</div>
+    <p><strong>Star</strong> = Contact card with everything on it: name, phone, email, company name, company address. Flat and easy. <strong>Snowflake</strong> = Contact card with name and phone, but "company" is a hyperlink to a separate Company Card, which links to an Industry Card. More organized, less duplication, but you click through to get the full picture.</p>
+  </div>
+  <div class="callout callout-warning">
+    <h4>Kimball's Preference</h4>
+    <p>Kimball generally <strong>discourages snowflaking</strong>. Space savings from normalizing dimension tables are negligible compared to the fact table. Extra joins hurt query performance and user comprehension. Snowflake only when the dimension is genuinely enormous (millions of rows).</p>
+  </div>
+</section>
+
+<!-- ═══════════ 21 — SCDs ═══════════ -->
+<section class="section" id="scd">
+  <div class="section-header">
+    <div class="section-number">Section 09</div>
+    <h2 class="section-title">Slowly Changing Dimensions (SCDs)</h2>
+    <div class="section-divider"></div>
+    <p class="section-subtitle">What happens when a customer moves, or a product gets re-categorized?</p>
+  </div>
+  <div class="grid-2">
+    <div class="card gold card-wide">
+      <div class="level-badge level-simple">Type 1 — Overwrite</div>
+      <h3>SCD Type 1</h3>
+      <p><strong>Update old value</strong> with new. No history preserved. Dimension always reflects current state.</p>
+      <p style="margin-top:0.5rem;"><strong>Use when:</strong> Correcting typos, updating non-analytical attributes.</p>
+      <p style="margin-top:0.5rem;"><strong>Risk:</strong> All historical facts appear with the new value.</p>
+    </div>
+    <div class="card blue card-wide">
+      <div class="level-badge level-medium">Type 2 — Add New Row (Most Important!)</div>
+      <h3>SCD Type 2</h3>
+      <p>Create a <strong>new row</strong> with a new surrogate key. Old row gets <code>is_current = false</code> and an <code>end_date</code>. Fully preserves history.</p>
+      <div class="code-block" style="margin-top:1rem;">
+<pre>
+<span class="cm">-- Customer moves from Munich → Berlin</span>
+<span class="cm">-- BEFORE: 1 row</span>
+<span class="cm">-- key=42, city='Munich', is_current=true, start='2020-01-01', end='9999-12-31'</span>
+
+<span class="cm">-- AFTER: 2 rows</span>
+<span class="cm">-- key=42, city='Munich', is_current=false, start='2020-01-01', end='2024-06-30'</span>
+<span class="cm">-- key=99, city='Berlin', is_current=true,  start='2024-07-01', end='9999-12-31'</span>
+</pre>
+      </div>
+    </div>
+    <div class="card purple card-wide">
+      <div class="level-badge level-advanced">Type 3 — Add Column</div>
+      <h3>SCD Type 3</h3>
+      <p>Add a column for the <strong>previous value</strong>. Only tracks one level of change.</p>
+      <p style="margin-top:0.5rem;"><code>current_city = 'Berlin'</code>, <code>previous_city = 'Munich'</code></p>
+    </div>
+    <div class="card rose card-wide">
+      <div class="level-badge level-complex">Type 6 — Hybrid (1+2+3)</div>
+      <h3>SCD Type 6</h3>
+      <p>Combines all three: new rows (Type 2), with current value overwritten on every row (Type 1), plus previous column (Type 3). Maximum flexibility.</p>
+    </div>
+  </div>
+  <div class="analogy-box">
+    <div class="analogy-title">Analogy — Phone Contact History</div>
+    <p><strong>Type 1</strong> = Update friend's number; old one is gone. <strong>Type 2</strong> = Phone keeps every version: "Mobile (current)", "Mobile (old — until June 2024)". <strong>Type 3</strong> = Shows "Current: 555-1234, Previous: 555-9876" — just two slots. <strong>Type 6</strong> = Each version entry also shows the latest number for instant comparison.</p>
+  </div>
+</section>
+
+<!-- ═══════════ 20 — SIMPLE ═══════════ -->
+<section class="section" id="simple">
+  <div class="section-header">
+    <div class="section-number">Section 10</div>
+    <h2 class="section-title">Simple — Coffee Shop Sales</h2>
+    <div class="section-divider"></div>
+    <div class="level-badge level-simple" style="display:inline-flex;margin:0 auto;">☕ Beginner</div>
+  </div>
+  <div class="card gold card-wide"><h3>Scenario</h3><p>Single coffee shop. Questions: <em>What drinks sell best? Peak hours? Which baristas generate most revenue?</em></p></div>
+  <div class="code-block" style="margin-top:1.5rem;">
+    <div class="code-label">SQL DDL</div>
+<pre>
+<span class="kw">CREATE TABLE</span> <span class="fn">dim_date</span> (
+    <span class="type">date_key</span>      <span class="kw">INT PRIMARY KEY</span>,  <span class="cm">-- YYYYMMDD</span>
+    <span class="type">full_date</span>     <span class="kw">DATE</span>,    <span class="type">day_of_week</span>   <span class="kw">VARCHAR(10)</span>,
+    <span class="type">month_name</span>    <span class="kw">VARCHAR(10)</span>,    <span class="type">quarter</span>  <span class="kw">INT</span>,    <span class="type">year</span>  <span class="kw">INT</span>,    <span class="type">is_weekend</span>  <span class="kw">BOOLEAN</span>
+);
+
+<span class="kw">CREATE TABLE</span> <span class="fn">dim_drink</span> (
+    <span class="type">drink_key</span>     <span class="kw">INT PRIMARY KEY</span>,
+    <span class="type">drink_name</span>    <span class="kw">VARCHAR(100)</span>,   <span class="type">category</span>  <span class="kw">VARCHAR(50)</span>,
+    <span class="type">size</span>          <span class="kw">VARCHAR(10)</span>,    <span class="type">is_seasonal</span>  <span class="kw">BOOLEAN</span>
+);
+
+<span class="kw">CREATE TABLE</span> <span class="fn">dim_barista</span> (
+    <span class="type">barista_key</span>   <span class="kw">INT PRIMARY KEY</span>,
+    <span class="type">barista_name</span>  <span class="kw">VARCHAR(100)</span>,   <span class="type">hire_date</span>  <span class="kw">DATE</span>,   <span class="type">shift</span>  <span class="kw">VARCHAR(10)</span>
+);
+
+<span class="kw">CREATE TABLE</span> <span class="fn">fact_coffee_sales</span> (
+    <span class="type">sale_key</span>         <span class="kw">INT PRIMARY KEY</span>,
+    <span class="type">date_key</span>         <span class="kw">INT REFERENCES</span> dim_date,
+    <span class="type">drink_key</span>        <span class="kw">INT REFERENCES</span> dim_drink,
+    <span class="type">barista_key</span>      <span class="kw">INT REFERENCES</span> dim_barista,
+    <span class="type">transaction_id</span>   <span class="kw">VARCHAR(20)</span>,       <span class="cm">-- degenerate dimension</span>
+    <span class="type">quantity</span>         <span class="kw">INT</span>,
+    <span class="type">unit_price</span>       <span class="kw">DECIMAL(6,2)</span>,
+    <span class="type">total_price</span>      <span class="kw">DECIMAL(8,2)</span>
+);
+</pre>
+  </div>
+  <div class="callout callout-tip"><h4>Why This Works</h4><p>Three dimensions, three joins, dead simple. "Show me what sold, when, and who made it." Star schemas read like English.</p></div>
+</section>
+
+<!-- ═══════════ 21 — MEDIUM ═══════════ -->
+<section class="section" id="medium">
+  <div class="section-header">
+    <div class="section-number">Section 11</div>
+    <h2 class="section-title">Medium — SaaS Subscription Platform</h2>
+    <div class="section-divider"></div>
+    <div class="level-badge level-medium" style="display:inline-flex;margin:0 auto;">💻 Intermediate</div>
+  </div>
+  <div class="card blue card-wide"><h3>Scenario</h3><p>B2B SaaS product. Track MRR by plan, churn by segment, feature usage, support volume. <strong>Two fact tables</strong> sharing conformed dimensions — your first "data mart bus."</p></div>
+  <div class="grid-2" style="margin-top:1.5rem;">
+    <div class="card teal"><h3>Fact 1: Subscription Snapshots</h3><p><strong>Periodic snapshot</strong> — one row per customer per month. Measures: mrr_amount (semi-additive!), seats_purchased, seats_active, is_churned.</p></div>
+    <div class="card purple"><h3>Fact 2: Support Tickets</h3><p><strong>Transaction + accumulating snapshot</strong> — one row per ticket with milestone dates. Measures: priority_score, resolution_minutes. Multiple date roles: created, assigned, resolved.</p></div>
+  </div>
+  <div class="callout callout-key" style="margin-top:1.5rem;">
+    <h4>Conformed Dimension Spotlight</h4>
+    <p><code>dim_customer</code> and <code>dim_date</code> are <strong>shared across both fact tables</strong>. This is the <strong>Bus Architecture</strong> — analysts can join subscription data with support data because dimensions are identical.</p>
+  </div>
+  <div class="callout callout-warning">
+    <h4>Semi-Additive Trap</h4>
+    <p>MRR is <strong>semi-additive</strong>: sum across customers ✅, but <strong>not across time</strong> ❌ (Jan MRR + Feb MRR = double-counting). Use <code>AVG()</code>, <code>MAX()</code>, or pick a snapshot date.</p>
+  </div>
+</section>
+
+<!-- ═══════════ 20 — ADVANCED ═══════════ -->
+<section class="section" id="advanced">
+  <div class="section-header">
+    <div class="section-number">Section 12</div>
+    <h2 class="section-title">Advanced — Multi-Channel Retailer</h2>
+    <div class="section-divider"></div>
+    <div class="level-badge level-advanced" style="display:inline-flex;margin:0 auto;">🏬 Advanced</div>
+  </div>
+  <div class="card purple card-wide"><h3>Scenario</h3><p>Fashion retailer: <strong>physical stores + e-commerce + mobile app</strong>. This introduces <strong>role-playing dimensions, junk dimensions, bridge tables, and heterogeneous products</strong>.</p></div>
+  <div class="grid-2" style="margin-top:1.5rem;">
+    <div class="card gold"><h3>Role-Playing Dimensions</h3><p>Same <code>dim_date</code> used as order_date, ship_date, delivery_date — three roles, one physical table, different SQL aliases.</p>
+      <div class="code-block"><pre><span class="kw">JOIN</span> dim_date <span class="fn">order_dt</span> <span class="kw">ON</span> f.order_date_key = order_dt.date_key
+<span class="kw">JOIN</span> dim_date <span class="fn">ship_dt</span>  <span class="kw">ON</span> f.ship_date_key  = ship_dt.date_key
+<span class="kw">JOIN</span> dim_date <span class="fn">dlvr_dt</span>  <span class="kw">ON</span> f.delivery_date_key = dlvr_dt.date_key</pre></div>
+    </div>
+    <div class="card teal"><h3>Junk Dimensions</h3><p>Grab-bag dimension for low-cardinality flags: is_gift_wrap, is_expedited, payment_type, order_channel. Only ~200 combinations → tiny table replacing 4+ fact columns with 1 FK.</p></div>
+    <div class="card blue"><h3>Bridge Tables</h3><p>For many-to-many: an order with multiple promotions. Bridge table with weighting factors (summing to 1.0) prevents double-counting.</p></div>
+    <div class="card rose"><h3>Heterogeneous Products</h3><p>Clothing, electronics, groceries — each with unique attributes. Core <code>dim_product</code> + product-type outrigger tables for specialized attributes.</p></div>
+  </div>
+  <div class="analogy-box">
+    <div class="analogy-title">Analogy — Swiss Army Knife</div>
+    <p><strong>Role-playing</strong> = Same blade used as knife, screwdriver, can opener. <strong>Junk dims</strong> = Kitchen junk drawer (batteries, rubber bands, twist ties). <strong>Bridge tables</strong> = Instagram group photo tags — one photo tags multiple people, one person in multiple photos.</p>
+  </div>
+</section>
+
+<!-- ═══════════ 21 — COMPLEX ═══════════ -->
+<section class="section" id="complex">
+  <div class="section-header">
+    <div class="section-number">Section 13</div>
+    <h2 class="section-title">Complex — Healthcare Claims Warehouse</h2>
+    <div class="section-divider"></div>
+    <div class="level-badge level-complex" style="display:inline-flex;margin:0 auto;">🏥 Expert</div>
+  </div>
+  <div class="card rose card-wide"><h3>Scenario</h3><p>Health insurer processing <strong>millions of claims</strong>/year. Complex lifecycle (submitted → adjudicated → paid/denied → appealed), multiple diagnosis codes, multiple procedure codes. Uses <strong>every advanced Kimball pattern simultaneously</strong>.</p></div>
+  <div class="code-block" style="margin-top:1.5rem;">
+    <div class="code-label">Complex Fact Table</div>
+<pre>
+<span class="kw">CREATE TABLE</span> <span class="fn">fact_claim_lifecycle</span> (
+    <span class="type">claim_key</span>               <span class="kw">INT PRIMARY KEY</span>,
+    <span class="cm">-- 6 role-playing date dimensions</span>
+    <span class="type">submitted_date_key</span>      <span class="kw">INT</span>,   <span class="type">received_date_key</span>     <span class="kw">INT</span>,
+    <span class="type">adjudicated_date_key</span>    <span class="kw">INT</span>,   <span class="type">paid_date_key</span>         <span class="kw">INT</span>,
+    <span class="type">appeal_date_key</span>         <span class="kw">INT</span>,   <span class="type">closed_date_key</span>       <span class="kw">INT</span>,
+    <span class="cm">-- Regular + mini + junk + bridge dimensions</span>
+    <span class="type">patient_key</span>             <span class="kw">INT</span>,
+    <span class="type">patient_profile_key</span>     <span class="kw">INT</span>,   <span class="cm">-- mini-dimension (volatile demographics)</span>
+    <span class="type">provider_key</span>            <span class="kw">INT</span>,   <span class="type">facility_key</span>   <span class="kw">INT</span>,   <span class="type">payer_key</span>   <span class="kw">INT</span>,
+    <span class="type">diagnosis_group_key</span>     <span class="kw">INT</span>,   <span class="cm">-- → bridge table (multi-valued)</span>
+    <span class="type">claim_flags_key</span>         <span class="kw">INT</span>,   <span class="cm">-- junk dimension</span>
+    <span class="type">claim_number</span>            <span class="kw">VARCHAR(30)</span>, <span class="cm">-- degenerate dimension</span>
+    <span class="cm">-- Measures</span>
+    <span class="type">billed_amount</span>  <span class="kw">DECIMAL(12,2)</span>,  <span class="type">allowed_amount</span>  <span class="kw">DECIMAL(12,2)</span>,
+    <span class="type">paid_amount</span>    <span class="kw">DECIMAL(12,2)</span>,  <span class="type">patient_responsibility</span>  <span class="kw">DECIMAL(12,2)</span>,
+    <span class="cm">-- Lag measures (computed from milestones)</span>
+    <span class="type">days_to_adjudicate</span>  <span class="kw">INT</span>,  <span class="type">days_to_pay</span>  <span class="kw">INT</span>,  <span class="type">days_to_close</span>  <span class="kw">INT</span>
+);
+</pre>
+  </div>
+</section>
+
+<!-- ═══════════ 20 — E-COMMERCE CASE STUDY ═══════════ -->
+<section class="section" id="ecommerce">
+  <div class="section-header">
+    <div class="section-number">Section 14</div>
+    <h2 class="section-title">Real-World — E-Commerce Dimensional Model</h2>
+    <div class="section-divider"></div>
+    <div class="level-badge level-real" style="display:inline-flex;margin:0 auto;">🛒 Production-Grade</div>
+    <p class="section-subtitle" style="margin-top:1rem;">How an online health supplements company implements Kimball at scale.</p>
+  </div>
+
+  <div class="diagram-container" style="margin-top:2rem;">
+    <div class="diagram-title">Enterprise Bus Matrix</div>
+    <p style="color:var(--text-secondary);font-size:0.9rem;margin-bottom:1.5rem;">Rows = business processes (fact tables). Columns = dimensions. ✅ = shared/conformed.</p>
+    <div style="overflow-x:auto;">
+      <table class="styled-table" style="min-width:800px;">
+        <thead><tr><th>Process →</th><th>Date</th><th>Customer</th><th>Product</th><th>Channel</th><th>Geo</th><th>Promo</th><th>Warehouse</th><th>Supplier</th></tr></thead>
+        <tbody>
+          <tr><td style="font-weight:600;color:var(--accent-gold);">Orders</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td></td><td></td></tr>
+          <tr><td style="font-weight:600;color:var(--accent-gold);">Returns</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td></td><td></td><td>✅</td><td></td></tr>
+          <tr><td style="font-weight:600;color:var(--accent-gold);">Inventory</td><td>✅</td><td></td><td>✅</td><td></td><td></td><td></td><td>✅</td><td>✅</td></tr>
+          <tr><td style="font-weight:600;color:var(--accent-gold);">Clickstream</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td></td><td></td></tr>
+          <tr><td style="font-weight:600;color:var(--accent-gold);">Shipments</td><td>✅</td><td>✅</td><td>✅</td><td></td><td>✅</td><td></td><td>✅</td><td></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <h4 style="font-family:'Playfair Display',serif;margin:3rem 0 1.5rem;font-size:1.4rem;">Primary Star: Order Line Items</h4>
+  <div class="code-block">
+    <div class="code-label">Production Fact</div>
+<pre>
+<span class="kw">CREATE TABLE</span> <span class="fn">fact_order_line</span> (
+    <span class="type">order_line_key</span>     <span class="kw">BIGINT PRIMARY KEY</span>,
+    <span class="cm">-- Role-playing dates</span>
+    <span class="type">order_date_key</span>     <span class="kw">INT</span>,  <span class="type">ship_date_key</span>  <span class="kw">INT</span>,  <span class="type">delivery_date_key</span>  <span class="kw">INT</span>,
+    <span class="cm">-- Conformed dimensions</span>
+    <span class="type">customer_key</span>       <span class="kw">INT</span>,  <span class="type">product_key</span>  <span class="kw">INT</span>,  <span class="type">channel_key</span>  <span class="kw">INT</span>,
+    <span class="type">ship_to_geo_key</span>    <span class="kw">INT</span>,  <span class="type">promo_key</span>  <span class="kw">INT</span>,  <span class="type">warehouse_key</span>  <span class="kw">INT</span>,
+    <span class="type">order_flags_key</span>    <span class="kw">INT</span>,       <span class="cm">-- junk dimension</span>
+    <span class="type">order_number</span>       <span class="kw">VARCHAR(30)</span>,  <span class="cm">-- degenerate dim</span>
+    <span class="type">line_number</span>        <span class="kw">INT</span>,           <span class="cm">-- degenerate dim</span>
+    <span class="cm">-- Additive measures</span>
+    <span class="type">quantity_ordered</span>   <span class="kw">INT</span>,        <span class="type">unit_price</span>  <span class="kw">DECIMAL(10,2)</span>,
+    <span class="type">unit_cost</span>          <span class="kw">DECIMAL(10,2)</span>,  <span class="type">extended_price</span>  <span class="kw">DECIMAL(12,2)</span>,
+    <span class="type">discount_amount</span>    <span class="kw">DECIMAL(10,2)</span>,  <span class="type">tax_amount</span>  <span class="kw">DECIMAL(10,2)</span>,
+    <span class="type">shipping_cost</span>      <span class="kw">DECIMAL(10,2)</span>,  <span class="type">net_revenue</span>  <span class="kw">DECIMAL(12,2)</span>,
+    <span class="type">gross_margin</span>       <span class="kw">DECIMAL(12,2)</span>,
+    <span class="cm">-- Non-additive (compute at query time when possible)</span>
+    <span class="type">margin_pct</span>  <span class="kw">DECIMAL(5,4)</span>,  <span class="type">discount_pct</span>  <span class="kw">DECIMAL(5,4)</span>
+);
+</pre>
+  </div>
+
+  <div class="code-block">
+    <div class="code-label">Real Business Query — Cohort Revenue</div>
+<pre>
+<span class="kw">SELECT</span>
+    <span class="fn">DATE_TRUNC</span>(<span class="str">'month'</span>, c.registration_date) <span class="kw">AS</span> cohort_month,
+    d.month_name || <span class="str">' '</span> || d.year              <span class="kw">AS</span> order_month,
+    <span class="fn">COUNT</span>(<span class="kw">DISTINCT</span> c.customer_id)              <span class="kw">AS</span> active_customers,
+    <span class="fn">SUM</span>(f.net_revenue)                        <span class="kw">AS</span> total_revenue
+<span class="kw">FROM</span> fact_order_line f
+<span class="kw">JOIN</span> dim_customer c  <span class="kw">ON</span> f.customer_key = c.customer_key <span class="kw">AND</span> c.is_current
+<span class="kw">JOIN</span> dim_date d      <span class="kw">ON</span> f.order_date_key = d.date_key
+<span class="kw">GROUP BY</span> <span class="num">1</span>, <span class="num">2</span>
+<span class="kw">ORDER BY</span> cohort_month, order_month;
+</pre>
+  </div>
+
+  <div class="analogy-box">
+    <div class="analogy-title">Analogy — Department Store Floor Plan</div>
+    <p>Each star schema is a <strong>department</strong>. Orders department, Returns department, Inventory department. But all use the <strong>same customer loyalty system</strong> (dim_customer), <strong>same product catalog</strong> (dim_product), <strong>same calendar</strong> (dim_date). A customer who buys shoes in one and returns a shirt in another is recognized everywhere. That's conformed dimensions connecting multiple stars into an enterprise warehouse.</p>
+  </div>
+</section>
+
+<!-- ═══════════ 21 — dbt IMPLEMENTATION (NEW) ═══════════ -->
+<section class="section" id="dbt-impl">
+  <div class="section-header">
+    <div class="section-number">Section 15</div>
+    <h2 class="section-title">Implementing Kimball with dbt</h2>
+    <div class="section-divider"></div>
+    <p class="section-subtitle">Kimball as code — the modern way to build dimensional models. Copy these patterns directly into your dbt project.</p>
+  </div>
+
+  <div class="card gold card-wide">
+    <h3>dbt Project Structure = Kimball Layers</h3>
+    <div class="code-block">
+      <div class="code-label">Project Layout</div>
+<pre>
+models/
+├── staging/              <span class="cm">← 1:1 with source tables (clean + rename)</span>
+│   ├── stg_shopify__orders.sql
+│   ├── stg_shopify__order_lines.sql
+│   ├── stg_shopify__customers.sql
+│   └── stg_shopify__products.sql
+├── intermediate/         <span class="cm">← Business logic, joins, dedup, SCD logic</span>
+│   ├── int_orders__enriched.sql
+│   └── int_customers__deduplicated.sql
+└── marts/                <span class="cm">← ⭐ KIMBALL STAR SCHEMAS ⭐</span>
+    ├── core/
+    │   ├── dim_date.sql
+    │   ├── dim_customer.sql
+    │   ├── dim_product.sql
+    │   ├── dim_channel.sql
+    │   └── fct_order_lines.sql
+    └── marketing/
+        └── fct_campaign_performance.sql
+</pre>
+    </div>
+  </div>
+
+  <h4 style="font-family:'Playfair Display',serif;margin:2rem 0 1rem;font-size:1.2rem;">Real dbt Models — Copy-Pasteable</h4>
+
+  <div class="grid-2">
+    <div class="card blue card-wide">
+      <h3>Staging Model</h3>
+      <div class="code-block">
+        <div class="code-label">stg_shopify__orders.sql</div>
+<pre>
+<span class="kw">WITH</span> source <span class="kw">AS</span> (
+    <span class="kw">SELECT</span> * <span class="kw">FROM</span> {{ <span class="fn">source</span>(<span class="str">'shopify'</span>, <span class="str">'orders'</span>) }}
+),
+
+renamed <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        id                <span class="kw">AS</span> order_id,
+        customer_id,
+        order_number,
+        created_at        <span class="kw">AS</span> ordered_at,
+        total_price       <span class="kw">AS</span> order_total,
+        financial_status  <span class="kw">AS</span> payment_status,
+        fulfillment_status,
+        cancel_reason,
+        source_name       <span class="kw">AS</span> order_channel,
+        _fivetran_synced  <span class="kw">AS</span> loaded_at
+    <span class="kw">FROM</span> source
+    <span class="kw">WHERE</span> _fivetran_deleted <span class="kw">IS FALSE</span>
+)
+
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> renamed
+</pre>
+      </div>
+    </div>
+
+    <div class="card teal card-wide">
+      <h3>Dimension Model</h3>
+      <div class="code-block">
+        <div class="code-label">dim_customer.sql</div>
+<pre>
+<span class="kw">WITH</span> customers <span class="kw">AS</span> (
+    <span class="kw">SELECT</span> * <span class="kw">FROM</span> {{ <span class="fn">ref</span>(<span class="str">'stg_shopify__customers'</span>) }}
+),
+
+enriched <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        <span class="cm">-- Surrogate key</span>
+        {{ <span class="fn">dbt_utils.generate_surrogate_key</span>(
+            [<span class="str">'customer_id'</span>]
+        ) }} <span class="kw">AS</span> customer_key,
+
+        <span class="cm">-- Natural key</span>
+        customer_id,
+
+        <span class="cm">-- Attributes</span>
+        first_name,
+        last_name,
+        first_name || <span class="str">' '</span> || last_name
+            <span class="kw">AS</span> full_name,
+        email,
+        city,
+        state,
+        country,
+        created_at   <span class="kw">AS</span> registration_date,
+
+        <span class="cm">-- Computed attributes</span>
+        <span class="kw">CASE</span>
+          <span class="kw">WHEN</span> total_spent >= <span class="num">500</span>
+            <span class="kw">THEN</span> <span class="str">'Gold'</span>
+          <span class="kw">WHEN</span> total_spent >= <span class="num">200</span>
+            <span class="kw">THEN</span> <span class="str">'Silver'</span>
+          <span class="kw">ELSE</span> <span class="str">'Bronze'</span>
+        <span class="kw">END AS</span> loyalty_tier,
+
+        <span class="cm">-- SCD Type 2 metadata</span>
+        <span class="kw">TRUE AS</span> is_current,
+        created_at <span class="kw">AS</span> effective_start,
+        <span class="str">'9999-12-31'</span>::<span class="kw">DATE AS</span> effective_end
+    <span class="kw">FROM</span> customers
+)
+
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> enriched
+</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="card gold card-wide" style="margin-top:1.5rem;">
+    <h3>Fact Model</h3>
+    <div class="code-block">
+      <div class="code-label">fct_order_lines.sql</div>
+<pre>
+<span class="kw">WITH</span> order_lines <span class="kw">AS</span> (
+    <span class="kw">SELECT</span> * <span class="kw">FROM</span> {{ <span class="fn">ref</span>(<span class="str">'stg_shopify__order_lines'</span>) }}
+),
+
+orders <span class="kw">AS</span> (
+    <span class="kw">SELECT</span> * <span class="kw">FROM</span> {{ <span class="fn">ref</span>(<span class="str">'stg_shopify__orders'</span>) }}
+),
+
+dim_date <span class="kw">AS</span> (
+    <span class="kw">SELECT</span> * <span class="kw">FROM</span> {{ <span class="fn">ref</span>(<span class="str">'dim_date'</span>) }}
+),
+
+dim_customer <span class="kw">AS</span> (
+    <span class="kw">SELECT</span> * <span class="kw">FROM</span> {{ <span class="fn">ref</span>(<span class="str">'dim_customer'</span>) }}
+),
+
+dim_product <span class="kw">AS</span> (
+    <span class="kw">SELECT</span> * <span class="kw">FROM</span> {{ <span class="fn">ref</span>(<span class="str">'dim_product'</span>) }}
+),
+
+final <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        <span class="cm">-- Surrogate key for the fact row</span>
+        {{ <span class="fn">dbt_utils.generate_surrogate_key</span>(
+            [<span class="str">'ol.order_id'</span>, <span class="str">'ol.line_number'</span>]
+        ) }}                                   <span class="kw">AS</span> order_line_key,
+
+        <span class="cm">-- Dimension FKs (look up surrogate keys)</span>
+        dd.date_key                            <span class="kw">AS</span> order_date_key,
+        dc.customer_key,
+        dp.product_key,
+
+        <span class="cm">-- Degenerate dimensions</span>
+        o.order_number,
+        ol.line_number,
+
+        <span class="cm">-- Measures</span>
+        ol.quantity,
+        ol.unit_price,
+        ol.quantity * ol.unit_price            <span class="kw">AS</span> extended_price,
+        <span class="fn">COALESCE</span>(ol.discount_amount, <span class="num">0</span>)        <span class="kw">AS</span> discount_amount,
+        (ol.quantity * ol.unit_price)
+          - <span class="fn">COALESCE</span>(ol.discount_amount, <span class="num">0</span>)    <span class="kw">AS</span> net_revenue
+
+    <span class="kw">FROM</span> order_lines ol
+    <span class="kw">JOIN</span> orders o        <span class="kw">ON</span> ol.order_id = o.order_id
+    <span class="kw">LEFT JOIN</span> dim_date dd     <span class="kw">ON</span> o.ordered_at::DATE = dd.full_date
+    <span class="kw">LEFT JOIN</span> dim_customer dc  <span class="kw">ON</span> o.customer_id = dc.customer_id
+                              <span class="kw">AND</span> dc.is_current
+    <span class="kw">LEFT JOIN</span> dim_product dp   <span class="kw">ON</span> ol.product_id = dp.product_id
+                              <span class="kw">AND</span> dp.is_current
+)
+
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> final
+</pre>
+    </div>
+  </div>
+
+  <div class="callout callout-tip">
+    <h4>dbt schema.yml — Tests That Enforce Kimball Rules</h4>
+    <div class="code-block">
+<pre>
+<span class="cm">models:</span>
+  <span class="cm">- name:</span> fct_order_lines
+    <span class="cm">columns:</span>
+      <span class="cm">- name:</span> order_line_key
+        <span class="cm">tests:</span>
+          - unique          <span class="cm"># every fact row is unique</span>
+          - not_null
+      <span class="cm">- name:</span> order_date_key
+        <span class="cm">tests:</span>
+          - not_null
+          - relationships:  <span class="cm"># referential integrity!</span>
+              to: ref('dim_date')
+              field: date_key
+      <span class="cm">- name:</span> customer_key
+        <span class="cm">tests:</span>
+          - not_null
+          - relationships:
+              to: ref('dim_customer')
+              field: customer_key
+      <span class="cm">- name:</span> net_revenue
+        <span class="cm">tests:</span>
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: 0    <span class="cm"># revenue shouldn't be negative</span>
+</pre>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ 20 — NAMING CONVENTIONS (NEW) ═══════════ -->
+<section class="section" id="naming">
+  <div class="section-header">
+    <div class="section-number">Section 16</div>
+    <h2 class="section-title">Naming Conventions &amp; Standards</h2>
+    <div class="section-divider"></div>
+    <p class="section-subtitle">Consistent naming = readable queries = happy analysts. Adopt these standards on Day 1.</p>
+  </div>
+
+  <div class="diagram-container">
+    <div class="diagram-title">Table Naming Convention</div>
+    <table class="cheat-table">
+      <thead><tr><th>Prefix</th><th>Layer</th><th>Example</th><th>Purpose</th></tr></thead>
+      <tbody>
+        <tr><td>stg_</td><td>Staging</td><td>stg_shopify__orders</td><td>1:1 source replica, cleaned</td></tr>
+        <tr><td>int_</td><td>Intermediate</td><td>int_orders__enriched</td><td>Business logic, joins</td></tr>
+        <tr><td>dim_</td><td>Mart (Dimension)</td><td>dim_customer</td><td>Descriptive context</td></tr>
+        <tr><td>fct_</td><td>Mart (Fact)</td><td>fct_order_lines</td><td>Measurable events</td></tr>
+        <tr><td>bridge_</td><td>Mart (Bridge)</td><td>bridge_order_promo</td><td>Many-to-many resolver</td></tr>
+        <tr><td>rpt_</td><td>Reporting</td><td>rpt_monthly_revenue</td><td>Pre-aggregated for dashboards</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="grid-2" style="margin-top:2rem;">
+    <div class="card teal card-wide">
+      <h3>Column Naming Rules</h3>
+      <table class="cheat-table">
+        <thead><tr><th>Rule</th><th>Good ✅</th><th>Bad ❌</th></tr></thead>
+        <tbody>
+          <tr><td>snake_case always</td><td>order_date</td><td>OrderDate, orderDate</td></tr>
+          <tr><td>Full words, no abbreviations</td><td>customer_id</td><td>cust_id, cid</td></tr>
+          <tr><td>Booleans: is_ or has_ prefix</td><td>is_active, has_discount</td><td>active_flag, disc_flg</td></tr>
+          <tr><td>Dates: _at for timestamps, _date for dates</td><td>created_at, order_date</td><td>created, dt_ord</td></tr>
+          <tr><td>Amounts: explicit unit</td><td>revenue_usd, weight_kg</td><td>amount, wt</td></tr>
+          <tr><td>Keys: _key for surrogates, _id for natural</td><td>customer_key, customer_id</td><td>customer_sk, cust_nk</td></tr>
+          <tr><td>Counts: _count suffix</td><td>order_count</td><td>num_orders, n_ord</td></tr>
+          <tr><td>Percentages: _pct suffix</td><td>discount_pct</td><td>disc_perc, pctdisc</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card gold card-wide">
+      <h3>Dimension Attribute Patterns</h3>
+      <table class="cheat-table">
+        <thead><tr><th>Pattern</th><th>Example</th></tr></thead>
+        <tbody>
+          <tr><td>Hierarchy levels: _l1, _l2, _l3</td><td>category_l1, category_l2</td></tr>
+          <tr><td>SCD metadata: is_current, effective_start, effective_end</td><td>Always present on SCD2 dims</td></tr>
+          <tr><td>Unknown rows: key = -1, attributes = 'Unknown'</td><td>-1, 'Unknown', 'N/A'</td></tr>
+          <tr><td>Degenerate dims: live in fact table, no prefix</td><td>order_number, invoice_id</td></tr>
+          <tr><td>Junk dim: dim_{context}_flags</td><td>dim_order_flags</td></tr>
+          <tr><td>Role alias: {role}_date_key</td><td>ship_date_key, order_date_key</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ 21 — TESTING & DATA QUALITY (NEW) ═══════════ -->
+<section class="section" id="testing">
+  <div class="section-header">
+    <div class="section-number">Section 17</div>
+    <h2 class="section-title">Testing &amp; Data Quality</h2>
+    <div class="section-divider"></div>
+    <p class="section-subtitle">A dimensional model without tests is a ticking time bomb. These checks keep your warehouse trustworthy.</p>
+  </div>
+
+  <div class="grid-2">
+    <div class="card teal card-wide">
+      <h3>Fact Table Tests</h3>
+      <div class="process-steps" style="margin:1rem 0 0 0;">
+        <div class="process-step" style="padding:0.8rem;"><div class="step-num" style="width:32px;height:32px;min-width:32px;font-size:0.7rem;">1</div><div class="step-content"><h4 style="font-size:0.9rem;">Uniqueness at grain level</h4><p style="font-size:0.82rem;">Composite key (order_id + line_number) must be unique. If it's not, your grain is violated.</p></div></div>
+        <div class="process-step" style="padding:0.8rem;"><div class="step-num" style="width:32px;height:32px;min-width:32px;font-size:0.7rem;">2</div><div class="step-content"><h4 style="font-size:0.9rem;">Referential integrity</h4><p style="font-size:0.82rem;">Every FK in the fact must exist in its dimension. Test with <code>relationships</code> test in dbt.</p></div></div>
+        <div class="process-step" style="padding:0.8rem;"><div class="step-num" style="width:32px;height:32px;min-width:32px;font-size:0.7rem;">3</div><div class="step-content"><h4 style="font-size:0.9rem;">No NULL foreign keys</h4><p style="font-size:0.82rem;">Use <code>not_null</code> test on every FK. Orphan facts point to the "Unknown" dimension row.</p></div></div>
+        <div class="process-step" style="padding:0.8rem;"><div class="step-num" style="width:32px;height:32px;min-width:32px;font-size:0.7rem;">4</div><div class="step-content"><h4 style="font-size:0.9rem;">Measure sanity checks</h4><p style="font-size:0.82rem;">Revenue ≥ 0, quantity > 0, discount_pct between 0 and 1. Use <code>accepted_range</code>.</p></div></div>
+        <div class="process-step" style="padding:0.8rem;"><div class="step-num" style="width:32px;height:32px;min-width:32px;font-size:0.7rem;">5</div><div class="step-content"><h4 style="font-size:0.9rem;">Row count monitoring</h4><p style="font-size:0.82rem;">Alert if today's fact load is ±50% from yesterday. Sudden drops = ETL failures.</p></div></div>
+      </div>
+    </div>
+
+    <div class="card blue card-wide">
+      <h3>Dimension Table Tests</h3>
+      <div class="process-steps" style="margin:1rem 0 0 0;">
+        <div class="process-step" style="padding:0.8rem;"><div class="step-num" style="width:32px;height:32px;min-width:32px;font-size:0.7rem;">1</div><div class="step-content"><h4 style="font-size:0.9rem;">Surrogate key uniqueness</h4><p style="font-size:0.82rem;">customer_key must be unique and not null. Non-negotiable.</p></div></div>
+        <div class="process-step" style="padding:0.8rem;"><div class="step-num" style="width:32px;height:32px;min-width:32px;font-size:0.7rem;">2</div><div class="step-content"><h4 style="font-size:0.9rem;">SCD Type 2: exactly one current row per entity</h4><p style="font-size:0.82rem;">For each natural key, there must be exactly one row where <code>is_current = true</code>.</p></div></div>
+        <div class="process-step" style="padding:0.8rem;"><div class="step-num" style="width:32px;height:32px;min-width:32px;font-size:0.7rem;">3</div><div class="step-content"><h4 style="font-size:0.9rem;">SCD Type 2: no date gaps</h4><p style="font-size:0.82rem;">For each entity, effective_end of row N must equal effective_start of row N+1.</p></div></div>
+        <div class="process-step" style="padding:0.8rem;"><div class="step-num" style="width:32px;height:32px;min-width:32px;font-size:0.7rem;">4</div><div class="step-content"><h4 style="font-size:0.9rem;">"Unknown" row exists</h4><p style="font-size:0.82rem;">Key -1 must be present in every dimension with attributes set to 'Unknown'.</p></div></div>
+        <div class="process-step" style="padding:0.8rem;"><div class="step-num" style="width:32px;height:32px;min-width:32px;font-size:0.7rem;">5</div><div class="step-content"><h4 style="font-size:0.9rem;">Enum validation</h4><p style="font-size:0.82rem;">loyalty_tier must be in ('Gold', 'Silver', 'Bronze', 'Unknown'). Use <code>accepted_values</code>.</p></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="code-block" style="margin-top:1.5rem;">
+    <div class="code-label">SQL: SCD Type 2 Integrity Check</div>
+<pre>
+<span class="cm">-- Find entities with more than one "current" row (should return 0 rows)</span>
+<span class="kw">SELECT</span> customer_id, <span class="fn">COUNT</span>(*) <span class="kw">AS</span> current_count
+<span class="kw">FROM</span> dim_customer
+<span class="kw">WHERE</span> is_current = <span class="kw">TRUE</span>
+<span class="kw">GROUP BY</span> customer_id
+<span class="kw">HAVING</span> <span class="fn">COUNT</span>(*) > <span class="num">1</span>;
+
+<span class="cm">-- Find date gaps in SCD2 history (should return 0 rows)</span>
+<span class="kw">WITH</span> ranked <span class="kw">AS</span> (
+    <span class="kw">SELECT</span> *, <span class="fn">LEAD</span>(effective_start) <span class="kw">OVER</span> (
+        <span class="kw">PARTITION BY</span> customer_id <span class="kw">ORDER BY</span> effective_start
+    ) <span class="kw">AS</span> next_start
+    <span class="kw">FROM</span> dim_customer
+)
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> ranked
+<span class="kw">WHERE</span> next_start <span class="kw">IS NOT NULL</span>
+  <span class="kw">AND</span> effective_end != next_start;
+</pre>
+  </div>
+</section>
+
+<!-- ═══════════ 20 — HANDS-ON EXERCISES (NEW) ═══════════ -->
+<section class="section" id="exercises">
+  <div class="section-header">
+    <div class="section-number">Section 18</div>
+    <h2 class="section-title">Hands-On Exercises</h2>
+    <div class="section-divider"></div>
+    <p class="section-subtitle">Practice these exercises to cement your understanding. Each builds on the previous one.</p>
+  </div>
+
+  <div class="exercise-box">
+    <div class="exercise-title">Exercise 1: Declare the Grain</div>
+    <div class="exercise-difficulty"><span class="level-badge level-simple">Beginner — 10 min</span></div>
+    <p>For each scenario below, write a one-sentence grain statement and identify whether the fact table is a transaction, periodic snapshot, or accumulating snapshot:</p>
+    <ul class="clean-list" style="margin-top:0.75rem;">
+      <li><strong>A:</strong> A fitness app tracking workouts. Users log exercises with sets, reps, and weight.</li>
+      <li><strong>B:</strong> A bank recording daily account balances for every customer.</li>
+      <li><strong>C:</strong> A university tracking student enrollment from application → acceptance → registration → graduation.</li>
+      <li><strong>D:</strong> An airline recording every flight booking with passenger, route, and price.</li>
+    </ul>
+    <p style="margin-top:1rem;color:var(--accent-blue);font-weight:600;">Hint: Ask "What is one row?" and "Does this row get updated, or is it insert-only?"</p>
+  </div>
+
+  <div class="exercise-box">
+    <div class="exercise-title">Exercise 2: Design a Star Schema</div>
+    <div class="exercise-difficulty"><span class="level-badge level-medium">Intermediate — 20 min</span></div>
+    <p>A food delivery app (think Uber Eats) wants to analyze orders. Design the complete star schema:</p>
+    <ul class="clean-list" style="margin-top:0.75rem;">
+      <li><strong>Step 1:</strong> State the business process and grain</li>
+      <li><strong>Step 2:</strong> List all dimension tables with 5+ attributes each</li>
+      <li><strong>Step 3:</strong> Define the fact table with all FKs, degenerate dimensions, and measures</li>
+      <li><strong>Step 4:</strong> Identify which dimensions would be conformed if the company added a "driver ratings" star</li>
+    </ul>
+    <p style="margin-top:1rem;color:var(--accent-blue);font-weight:600;">Think about: dim_restaurant, dim_customer, dim_driver, dim_menu_item, dim_date, dim_payment_method, dim_geography</p>
+  </div>
+
+  <div class="exercise-box">
+    <div class="exercise-title">Exercise 3: Write the SQL</div>
+    <div class="exercise-difficulty"><span class="level-badge level-medium">Intermediate — 15 min</span></div>
+    <p>Using the coffee shop star schema from Section 10, write SQL queries to answer:</p>
+    <ul class="clean-list" style="margin-top:0.75rem;">
+      <li><strong>Q1:</strong> Which barista generated the most revenue last month?</li>
+      <li><strong>Q2:</strong> What is the average transaction value by day of the week?</li>
+      <li><strong>Q3:</strong> What are the top 3 seasonal drinks by total cups sold?</li>
+      <li><strong>Q4:</strong> Compare weekend vs. weekday revenue for each drink category.</li>
+    </ul>
+  </div>
+
+  <div class="exercise-box">
+    <div class="exercise-title">Exercise 4: SCD Type 2 Scenario</div>
+    <div class="exercise-difficulty"><span class="level-badge level-advanced">Advanced — 20 min</span></div>
+    <p>A customer (customer_id = 'C-1001') exists in your dim_customer with:</p>
+    <div class="code-block"><pre>customer_key=42, name='Hans', city='Munich', loyalty='Silver',
+is_current=true, eff_start='2023-01-15', eff_end='9999-12-31'</pre></div>
+    <p style="margin-top:0.75rem;">On 2025-02-01, Hans moves to Berlin AND gets upgraded to Gold tier. Write:</p>
+    <ul class="clean-list">
+      <li><strong>A:</strong> The UPDATE statement to close the old row</li>
+      <li><strong>B:</strong> The INSERT statement for the new row</li>
+      <li><strong>C:</strong> A query to find all of Hans's orders when he was still in Munich</li>
+    </ul>
+  </div>
+
+  <div class="exercise-box">
+    <div class="exercise-title">Exercise 5: Build a Bus Matrix</div>
+    <div class="exercise-difficulty"><span class="level-badge level-advanced">Advanced — 25 min</span></div>
+    <p>You're the data architect for a <strong>hotel chain</strong>. The business processes are: room bookings, guest check-ins, restaurant dining, spa appointments, housekeeping tasks, and loyalty point transactions.</p>
+    <ul class="clean-list" style="margin-top:0.75rem;">
+      <li><strong>Step 1:</strong> Create the Bus Matrix (process × dimensions grid)</li>
+      <li><strong>Step 2:</strong> Identify which dimensions are conformed</li>
+      <li><strong>Step 3:</strong> Recommend which star to build first and explain why</li>
+      <li><strong>Step 4:</strong> Design the fact table for "room bookings" with all FKs and measures</li>
+    </ul>
+  </div>
+
+  <div class="exercise-box">
+    <div class="exercise-title">Exercise 6: dbt Implementation</div>
+    <div class="exercise-difficulty"><span class="level-badge level-complex">Expert — 30 min</span></div>
+    <p>Using the food delivery star schema from Exercise 2, write complete dbt models:</p>
+    <ul class="clean-list" style="margin-top:0.75rem;">
+      <li><strong>A:</strong> A staging model for the source orders table</li>
+      <li><strong>B:</strong> A dim_restaurant dimension model with a surrogate key</li>
+      <li><strong>C:</strong> A fct_delivery_orders fact model that joins all dimensions</li>
+      <li><strong>D:</strong> A schema.yml file with at least 3 tests per model</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ═══════════ 21 — BEST PRACTICES ═══════════ -->
+<section class="section" id="best-practices">
+  <div class="section-header">
+    <div class="section-number">Section 19</div>
+    <h2 class="section-title">Best Practices &amp; Anti-Patterns</h2>
+    <div class="section-divider"></div>
+  </div>
+  <div class="grid-2">
+    <div class="card teal card-wide">
+      <h3 style="color:var(--accent-teal);">✅ Do This</h3>
+      <ul class="clean-list">
+        <li><strong>Declare grain first</strong> — if you can't state it in one sentence, stop</li>
+        <li><strong>Surrogate keys on every dimension</strong> — protect against source changes + enable SCD2</li>
+        <li><strong>Conformed dimensions from Day 1</strong> — design for reuse across future stars</li>
+        <li><strong>Atomic grain</strong> — store lowest detail; build aggregates separately</li>
+        <li><strong>dim_date on every fact</strong> — almost every question involves time</li>
+        <li><strong>Descriptive column names</strong> — <code>is_weekend</code>, not <code>wknd_flg</code></li>
+        <li><strong>"Unknown" rows</strong> — key=-1 in every dimension; never leave NULLs in FKs</li>
+        <li><strong>Version control your models</strong> — dbt + Git = auditable, testable warehouse</li>
+      </ul>
+    </div>
+    <div class="card rose card-wide">
+      <h3 style="color:var(--accent-rose);">🚫 Avoid This</h3>
+      <ul class="clean-list">
+        <li><strong>Centipede fact tables</strong> — 50+ FKs means mixed grains; split them</li>
+        <li><strong>Operational keys as PKs</strong> — source IDs change; always use surrogates</li>
+        <li><strong>NULL foreign keys</strong> — point to "Unknown" row instead</li>
+        <li><strong>Storing ratios as facts</strong> — store numerator + denominator; compute at query time</li>
+        <li><strong>Skipping the Bus Matrix</strong> — leads to incompatible dimensions</li>
+        <li><strong>Over-snowflaking</strong> — space savings are negligible vs. the join cost</li>
+        <li><strong>Mixing grains</strong> — order-level and line-level in the same fact = disaster</li>
+        <li><strong>No tests</strong> — unvalidated models erode trust faster than you can build it</li>
+      </ul>
+    </div>
+  </div>
+  <div class="callout callout-tip" style="margin-top:2rem;">
+    <h4>The Golden Rule</h4>
+    <p><strong>"Can a business user write a GROUP BY query without calling IT?"</strong> If yes, your model is on track.</p>
+  </div>
+</section>
+
+<!-- ═══════════ 20 — CHEAT SHEET (NEW) ═══════════ -->
+<section class="section" id="cheatsheet">
+  <div class="section-header">
+    <div class="section-number">Section 20</div>
+    <h2 class="section-title">Quick Reference Cheat Sheet</h2>
+    <div class="section-divider"></div>
+    <p class="section-subtitle">Print this. Pin it above your desk. Reference it during every modeling session.</p>
+  </div>
+
+  <div class="grid-2">
+    <div class="card gold card-wide">
+      <h3>The 4-Step Process</h3>
+      <table class="cheat-table">
+        <tbody>
+          <tr><td>1. Process</td><td>What repeatable business event are we modeling?</td></tr>
+          <tr><td>2. Grain</td><td>What does one row represent? (Most atomic level)</td></tr>
+          <tr><td>3. Dimensions</td><td>How will users slice/filter? (Who, what, where, when, why)</td></tr>
+          <tr><td>4. Facts</td><td>What numeric measures result? (Must be true at grain)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card blue card-wide">
+      <h3>Fact Table Types</h3>
+      <table class="cheat-table">
+        <tbody>
+          <tr><td>Transaction</td><td>1 row per event. Insert-only. Fully additive.</td></tr>
+          <tr><td>Periodic Snapshot</td><td>1 row per entity per period. Semi-additive.</td></tr>
+          <tr><td>Accumulating Snapshot</td><td>1 row per lifecycle. Updated at milestones.</td></tr>
+          <tr><td>Factless</td><td>No measures — records event occurrence or coverage.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card teal card-wide">
+      <h3>SCD Types</h3>
+      <table class="cheat-table">
+        <tbody>
+          <tr><td>Type 0</td><td>Never change. Retain original forever.</td></tr>
+          <tr><td>Type 1</td><td>Overwrite. No history. Current state only.</td></tr>
+          <tr><td>Type 2</td><td>New row + surrogate key. Full history. ⭐ Most used.</td></tr>
+          <tr><td>Type 3</td><td>Add column. Previous vs. current only.</td></tr>
+          <tr><td>Type 6</td><td>Hybrid (1+2+3). Maximum flexibility.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card purple card-wide">
+      <h3>Advanced Patterns</h3>
+      <table class="cheat-table">
+        <tbody>
+          <tr><td>Role-Playing Dim</td><td>Same table, multiple FKs (order_date, ship_date)</td></tr>
+          <tr><td>Junk Dimension</td><td>Low-cardinality flags bundled into one dim</td></tr>
+          <tr><td>Bridge Table</td><td>Many-to-many resolver with weighting factors</td></tr>
+          <tr><td>Mini-Dimension</td><td>Volatile attributes extracted from main dim</td></tr>
+          <tr><td>Degenerate Dim</td><td>Dimension value stored directly in fact (order_number)</td></tr>
+          <tr><td>Conformed Dim</td><td>Shared identically across multiple fact tables</td></tr>
+          <tr><td>Outrigger</td><td>Sub-table for product-type-specific attributes</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card orange card-wide">
+      <h3>Measure Types</h3>
+      <table class="cheat-table">
+        <tbody>
+          <tr><td>Additive</td><td>Sum across ALL dims. Revenue, quantity, cost.</td></tr>
+          <tr><td>Semi-Additive</td><td>Sum across SOME dims (not time). Balance, inventory.</td></tr>
+          <tr><td>Non-Additive</td><td>Cannot sum. Ratios, percentages. Compute at query time.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card rose card-wide">
+      <h3>Essential Tests Checklist</h3>
+      <table class="cheat-table">
+        <tbody>
+          <tr><td>✅ Fact grain unique</td><td>Composite PK must be unique + not null</td></tr>
+          <tr><td>✅ FK → PK integrity</td><td>Every FK exists in its dimension table</td></tr>
+          <tr><td>✅ No NULL FKs</td><td>Use "Unknown" row (key=-1) instead</td></tr>
+          <tr><td>✅ SCD2: 1 current row</td><td>Per natural key, exactly 1 is_current=true</td></tr>
+          <tr><td>✅ Measure ranges</td><td>Revenue ≥ 0, qty > 0, pct between 0–1</td></tr>
+          <tr><td>✅ Row count alerts</td><td>±50% from yesterday = investigate</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ 21 — Q&A ═══════════ -->
+<section class="section" id="qa">
+  <div class="section-header">
+    <div class="section-number">Section 21</div>
+    <h2 class="section-title">Comprehensive Q&amp;A</h2>
+    <div class="section-divider"></div>
+    <p class="section-subtitle">25 questions covering beginner to expert topics.</p>
+  </div>
+
+  <div class="qa-item"><div class="qa-question" onclick="toggleQA(this)"><div style="display:flex;align-items:center;gap:0.75rem;"><div class="q-icon">Q1</div><span>Why not just use a flat "One Big Table" for analytics?</span></div><div class="qa-toggle">▼</div></div><div class="qa-answer"><div class="qa-answer-inner">A single flat table works at small scale but fails when: (1) Massive data duplication — every order row repeats the entire customer profile. (2) Update anomalies — changing a customer's city means updating millions of rows. (3) Consistency issues — if you update in one place but not another, you get conflicting data. Star schemas store dimension data once; fact tables carry lightweight FKs. That said, an OBT materialized view <em>on top of</em> a star schema can be a valid performance optimization for specific dashboards.</div></div></div>
+
+  <div class="qa-item"><div class="qa-question" onclick="toggleQA(this)"><div style="display:flex;align-items:center;gap:0.75rem;"><div class="q-icon">Q2</div><span>What exactly is a "grain" and why is it so important?</span></div><div class="qa-toggle">▼</div></div><div class="qa-answer"><div class="qa-answer-inner">The grain is a precise statement of what one row represents — e.g., "one line item on one sales receipt at one store on one day." If the grain is wrong, you get double-counting (too coarse) or impossible queries (too fine). Test: can you describe it in one plain-English sentence? If you need caveats, you have a mixed-grain problem — split into separate fact tables.</div></div></div>
+
+  <div class="qa-item"><div class="qa-question" onclick="toggleQA(this)"><div style="display:flex;align-items:center;gap:0.75rem;"><div class="q-icon">Q3</div><span>Why use surrogate keys instead of business keys?</span></div><div class="qa-toggle">▼</div></div><div class="qa-answer"><div class="qa-answer-inner">Business keys can change (mergers), collide across source systems (customer 12345 in system A ≠ in system B), and can't handle SCD Type 2 (multiple rows need unique PKs while sharing the same business key). Integer surrogates are also faster for joins. Always keep the business key as an attribute for traceability.</div></div></div>
+
+  <div class="qa-item"><div class="qa-question" onclick="toggleQA(this)"><div style="display:flex;align-items:center;gap:0.75rem;"><div class="q-icon">Q4</div><span>When should I use SCD Type 2 vs. Type 1?</span></div><div class="qa-toggle">▼</div></div><div class="qa-answer"><div class="qa-answer-inner"><strong>Type 1</strong> when the old value was wrong (typo) or history doesn't matter. <strong>Type 2</strong> when you need "as was" vs. "as is" analysis — e.g., revenue by customer segment <em>at the time of purchase</em>. Common Type 2: address, segment, loyalty tier. Common Type 1: name corrections, email updates. Discuss with business stakeholders which attributes need historical tracking.</div></div></div>
+
+  <div class="qa-item"><div class="qa-question" onclick="toggleQA(this)"><div style="display:flex;align-items:center;gap:0.75rem;"><div class="q-icon">Q5</div><span>What is a conformed dimension?</span></div><div class="qa-toggle">▼</div></div><div class="qa-answer"><div class="qa-answer-inner">A dimension table shared identically across multiple fact tables — same keys, attributes, and hierarchies. dim_date is the classic example. This is what makes the Bus Architecture work: because orders and returns share the same dim_customer, you can compare data across both processes. Without conformity, you get "stovepipe" marts with conflicting definitions.</div></div></div>
+
+  <div class="qa-item"><div class="qa-question" onclick="toggleQA(this)"><div style="display:flex;align-items:center;gap:0.75rem;"><div class="q-icon">Q6</div><span>What is a degenerate dimension?</span></div><div class="qa-toggle">▼</div></div><div class="qa-answer"><div class="qa-answer-inner">A dimension key that lives directly in the fact table without its own dimension table — typically an order number, invoice number, or transaction ID. You can filter/group by it, but there's no separate table because there are no additional attributes worth storing. Creating a one-column dim table would be wasteful.</div></div></div>
+
+  <div class="qa-item"><div class="qa-question" onclick="toggleQA(this)"><div style="display:flex;align-items:center;gap:0.75rem;"><div class="q-icon">Q7</div><span>Additive vs. semi-additive vs. non-additive?</span></div><div class="qa-toggle">▼</div></div><div class="qa-answer"><div class="qa-answer-inner"><strong>Additive</strong>: sum across all dims (revenue, qty, cost). <strong>Semi-additive</strong>: sum across some dims but NOT time (account balance — you can sum across customers but not months). <strong>Non-additive</strong>: can't sum at all (unit price, percentages, ratios). Store components as additive; compute ratios at query time.</div></div></div>
+
+  <div class="qa-item"><div class="qa-question" onclick="toggleQA(this)"><div style="display:flex;align-items:center;gap:0.75rem;"><div class="q-icon">Q8</div><span>How does Kimball work with dbt in practice?</span></div><div class="qa-toggle">▼</div></div><div class="qa-answer"><div class="qa-answer-inner">dbt is "Kimball as code." <code>staging/</code> = cleaned source replicas. <code>intermediate/</code> = business logic and joins. <code>marts/</code> = star schemas (dim_ and fct_ models). Surrogate keys via <code>dbt_utils.generate_surrogate_key()</code>. SCD Type 2 via dbt snapshots. Referential integrity via <code>relationships</code> tests. Your entire Kimball warehouse becomes version-controlled, testable, documentable SQL.</div></div></div>
+
+  <div class="qa-item"><div class="qa-question" onclick="toggleQA(this)"><div style="display:flex;align-items:center;gap:0.75rem;"><div class="q-icon">Q9</div><span>What is the Bus Matrix?</span></div><div class="qa-toggle">▼</div></div><div class="qa-answer"><div class="qa-answer-inner">A grid: rows = business processes (fact tables), columns = dimensions. Checkmarks show which dimensions participate in which processes. Shared columns are conformed dimensions. It's both a planning tool (what to build next) and a communication tool (showing stakeholders how marts connect). Build it during requirements, use it to prioritize which star to build first.</div></div></div>
+
+  <div class="qa-item"><div class="qa-question" onclick="toggleQA(this)"><div style="display:flex;align-items:center;gap:0.75rem;"><div class="q-icon">Q10</div><span>How do I handle NULL foreign keys?</span></div><div class="qa-toggle">▼</div></div><div class="qa-answer"><div class="qa-answer-inner">Never allow NULL FKs. Create an "Unknown" row in each dimension (key = -1, attributes = 'Unknown'). Benefits: (1) INNER JOINs don't lose rows. (2) GROUP BYs show clean "Unknown" instead of NULL. (3) You can distinguish "don't know" (Unknown) from "doesn't apply" (N/A) with separate default rows.</div></div></div>
+
+  <div class="qa-item"><div class="qa-question" onclick="toggleQA(this)"><div style="display:flex;align-items:center;gap:0.75rem;"><div class="q-icon">Q11</div><span>Star vs. Snowflake — which should I use?</span></div><div class="qa-toggle">▼</div></div><div class="qa-answer"><div class="qa-answer-inner">Star schema in almost all cases. A 50K-row dim_product with some redundancy is a rounding error next to a 500M-row fact table. Snowflake only when: (1) dimension has millions of rows with a deep hierarchy, (2) strict governance demands normalization, (3) very deep hierarchy (10+ levels). Modern cloud warehouses with cheap columnar storage make the star schema's minor redundancy irrelevant.</div></div></div>
+
+  <div class="qa-item"><div class="qa-question" onclick="toggleQA(this)"><div style="display:flex;align-items:center;gap:0.75rem;"><div class="q-icon">Q12</div><span>How do I handle many-to-many relationships?</span></div><div class="qa-toggle">▼</div></div><div class="qa-answer"><div class="qa-answer-inner">Bridge table. Create a mapping table with a "group key" linking to individual dimension keys. Include a weighting factor (summing to 1.0 per group) to prevent double-counting during aggregations. Works for: patient-diagnoses, order-promotions, student-courses, account-holders on joint accounts.</div></div></div>
+
+  <div class="qa-item"><div class="qa-question" onclick="toggleQA(this)"><div style="display:flex;align-items:center;gap:0.75rem;"><div class="q-icon">Q13</div><span>What is a junk dimension?</span></div><div class="qa-toggle">▼</div></div><div class="qa-answer"><div class="qa-answer-inner">A catch-all dimension combining multiple low-cardinality flags: is_gift_wrap, is_expedited, payment_type, is_first_order. Pre-compute all combinations (e.g., 2×2×3×2 = 24 rows). Replaces 4+ fact columns with 1 FK. Use when you have 3+ low-cardinality categoricals that don't fit any existing dimension. Don't put high-cardinality attributes in junk dims.</div></div></div>
+
+  <div class="qa-item"><div class="qa-question" onclick="toggleQA(this)"><div style="display:flex;align-items:center;gap:0.75rem;"><div class="q-icon">Q14</div><span>How does Kimball handle real-time / streaming data?</span></div><div class="qa-toggle">▼</div></div><div class="qa-answer"><div class="qa-answer-inner">Traditional Kimball was batch, but adapts well: (1) <strong>Micro-batch</strong>: run dbt every 5–15 min. (2) <strong>Streaming inserts</strong>: Snowpipe / BigQuery Streaming API append to facts in near-real-time; dims update slower. (3) <strong>Materialized views</strong>: incrementally maintained as base tables change. Key insight: dimensions rarely need real-time updates — the streaming challenge is mostly appending new fact rows quickly.</div></div></div>
+
+  <div class="qa-item"><div class="qa-question" onclick="toggleQA(this)"><div style="display:flex;align-items:center;gap:0.75rem;"><div class="q-icon">Q15</div><span>Is Kimball still relevant in the age of AI/LLMs?</span></div><div class="qa-toggle">▼</div></div><div class="qa-answer"><div class="qa-answer-inner">More relevant than ever. LLMs doing text-to-SQL perform dramatically better with star schemas because: (1) Intuitive column names give strong semantic signals. (2) Simple join patterns (fact → dim) are easy for AI to generate correctly. (3) Conformed dimensions reduce ambiguity. (4) Business-meaningful naming (dim_customer, fct_orders) helps LLMs. Companies investing in "semantic layers" are building them on top of Kimball-modeled warehouses. Kimball is becoming the foundation for AI-powered analytics.</div></div></div>
+
+  <div class="qa-item"><div class="qa-question" onclick="toggleQA(this)"><div style="display:flex;align-items:center;gap:0.75rem;"><div class="q-icon">Q16</div><span>What is a factless fact table?</span></div><div class="qa-toggle">▼</div></div><div class="qa-answer"><div class="qa-answer-inner">A fact table with no numeric measures — only FKs. Two types: (1) <strong>Event-tracking</strong>: "student attended class Y on date Z." (2) <strong>Coverage</strong>: "promo X was active for product Y at store Z." Coverage tables answer "what was promoted but had zero sales?" — impossible without them because absence of a row in the sales fact is ambiguous.</div></div></div>
+
+  <div class="qa-item"><div class="qa-question" onclick="toggleQA(this)"><div style="display:flex;align-items:center;gap:0.75rem;"><div class="q-icon">Q17</div><span>How do I handle late-arriving facts and dimensions?</span></div><div class="qa-toggle">▼</div></div><div class="qa-answer"><div class="qa-answer-inner"><strong>Late facts</strong>: Insert with the correct date_key — they land in the right period. Adjust ETL to handle backdated records. <strong>Late dimensions</strong>: Create a placeholder row (attributes = 'Pending'). When data arrives, update via SCD Type 1. This ensures fact rows always have valid FKs and are never orphaned.</div></div></div>
+
+  <div class="qa-item"><div class="qa-question" onclick="toggleQA(this)"><div style="display:flex;align-items:center;gap:0.75rem;"><div class="q-icon">Q18</div><span>How does Kimball handle hierarchies?</span></div><div class="qa-toggle">▼</div></div><div class="qa-answer"><div class="qa-answer-inner">Flatten them into the dimension: <code>category_l1</code>, <code>category_l2</code>, <code>category_l3</code>. Some redundancy (category name repeated per product), but queries are trivial — <code>GROUP BY category_l1</code> with no extra joins. For ragged hierarchies (variable depth, like org charts), use a bridge table with parent-child relationships and level indicators.</div></div></div>
+
+  <div class="qa-item"><div class="qa-question" onclick="toggleQA(this)"><div style="display:flex;align-items:center;gap:0.75rem;"><div class="q-icon">Q19</div><span>Which business process should I model first?</span></div><div class="qa-toggle">▼</div></div><div class="qa-answer"><div class="qa-answer-inner">Score on three criteria: (1) <strong>Business value</strong>: Which process, analyzed better, has biggest impact? (2) <strong>Feasibility</strong>: Is source data available and clean? (3) <strong>Conformity leverage</strong>: Does it establish dim_customer, dim_product, dim_date that future stars reuse? For most companies, "sales/orders" wins on all three.</div></div></div>
+
+  <div class="qa-item"><div class="qa-question" onclick="toggleQA(this)"><div style="display:flex;align-items:center;gap:0.75rem;"><div class="q-icon">Q20</div><span>Can I use Kimball with a data lakehouse?</span></div><div class="qa-toggle">▼</div></div><div class="qa-answer"><div class="qa-answer-inner">Absolutely. The medallion architecture maps perfectly: Bronze = raw landing, Silver = cleaned/standardized, Gold = Kimball star schemas. Delta Lake supports ACID transactions, MERGE (critical for SCD2), and time travel. The lakehouse gives you flexible storage for ML workloads plus disciplined dimensional models for BI.</div></div></div>
+
+  <div class="qa-item"><div class="qa-question" onclick="toggleQA(this)"><div style="display:flex;align-items:center;gap:0.75rem;"><div class="q-icon">Q21</div><span>Data mart vs. data warehouse?</span></div><div class="qa-toggle">▼</div></div><div class="qa-answer"><div class="qa-answer-inner">In Kimball: a data mart = one star schema (one business process). The data warehouse = all connected marts sharing conformed dimensions. There's no separate "warehouse" database above the marts. The warehouse emerges as you build more stars. One star = one mart. Constellation of connected stars = enterprise warehouse.</div></div></div>
+
+  <div class="qa-item"><div class="qa-question" onclick="toggleQA(this)"><div style="display:flex;align-items:center;gap:0.75rem;"><div class="q-icon">Q22</div><span>What's the relationship between Kimball and the "One Big Table" trend?</span></div><div class="qa-toggle">▼</div></div><div class="qa-answer"><div class="qa-answer-inner">OBT is Kimball's denormalization taken to the extreme — pre-joining everything into one table. Works for: single dashboards, small datasets, maximum analyst simplicity. Fails for: cross-process analysis (no conformed dims), frequent changes (update nightmare), very wide tables (unwieldy). Pragmatic approach: build Kimball stars as source of truth, then materialize OBTs as downstream views for specific dashboards.</div></div></div>
+
+  <div class="qa-item"><div class="qa-question" onclick="toggleQA(this)"><div style="display:flex;align-items:center;gap:0.75rem;"><div class="q-icon">Q23</div><span>How do role-playing dimensions work?</span></div><div class="qa-toggle">▼</div></div><div class="qa-answer"><div class="qa-answer-inner">Same physical dimension table referenced multiple times with different aliases. An orders fact has order_date_key, ship_date_key, delivery_date_key — all pointing to dim_date. In SQL, alias each join differently. In BI tools, create separate "views" per role. The alternative (three identical date tables) would violate DRY and triple maintenance effort.</div></div></div>
+
+  <div class="qa-item"><div class="qa-question" onclick="toggleQA(this)"><div style="display:flex;align-items:center;gap:0.75rem;"><div class="q-icon">Q24</div><span>What are aggregate fact tables and when should I use them?</span></div><div class="qa-toggle">▼</div></div><div class="qa-answer"><div class="qa-answer-inner">Pre-computed summaries at a coarser grain — e.g., <code>fct_daily_sales_summary</code> that aggregates the atomic <code>fct_order_lines</code> to one row per product per store per day. Use them when: queries against the atomic fact are too slow for interactive dashboards. Always keep the atomic fact as the source of truth and build aggregates on top — never replace the detail with the summary. Modern cloud warehouses have reduced the need for aggregates thanks to automatic caching and clustering, but they still help for truly massive tables (billions of rows).</div></div></div>
+
+  <div class="qa-item"><div class="qa-question" onclick="toggleQA(this)"><div style="display:flex;align-items:center;gap:0.75rem;"><div class="q-icon">Q25</div><span>What are the most common beginner mistakes?</span></div><div class="qa-toggle">▼</div></div><div class="qa-answer"><div class="qa-answer-inner">(1) <strong>Skipping grain declaration</strong> — jumping to columns without agreeing what a row means. (2) <strong>Mixing grains</strong> — order-level and line-level in the same fact. (3) <strong>Copying OLTP schemas</strong> — facts and dims should be modeled for analytics, not copied from the source. (4) <strong>Too many tiny dims</strong> — dim_color with 12 rows is better as a product attribute. (5) <strong>Ignoring the Bus Matrix</strong>. (6) <strong>Over-engineering SCDs</strong> — applying Type 2 to every attribute. (7) <strong>Forgetting the "Unknown" row</strong>. (8) <strong>Not testing</strong> — a single broken FK erodes trust in the entire warehouse.</div></div></div>
+</section>
+
+<!-- ═══════════ FOOTER ═══════════ -->
+<footer class="footer">
+  <div class="footer-links">
+    <a href="https://www.linkedin.com/in/varuntyagi83/" target="_blank" rel="noopener">LinkedIn</a>
+    <a href="https://github.com/varuntyagi83" target="_blank" rel="noopener">GitHub</a>
+    <a href="https://medium.com/@varun.tyagi83" target="_blank" rel="noopener">Medium</a>
+    <a href="https://www.meetvaruntyagi.com" target="_blank" rel="noopener">Portfolio</a>
+  </div>
+  <div class="footer-credit">Crafted for the <strong style="color:var(--accent-gold);">AI Catalyst Cohort</strong> by Varun Tyagi</div>
+  <div style="color:var(--text-muted);font-size:0.75rem;margin-top:0.5rem;">© 2025 — Built on Kimball's timeless principles for the modern data era</div>
+</footer>
+
+</div><!-- end main-content -->
+
+<script>
+// ══════════════════════════════════════════════════
+// NAVIGATION — Dropdowns, Hamburger, Mobile Menu
+// ══════════════════════════════════════════════════
+
+// Smooth scroll helper — used by all nav items
+function scrollToTarget(targetId) {
+  var el = document.getElementById(targetId);
+  if (el) {
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
+// Desktop dropdown + sub-item clicks
+document.querySelectorAll('.nav-sub-item[data-target], .nav-item[data-target]').forEach(function(item) {
+  item.addEventListener('click', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    var targetId = this.getAttribute('data-target');
+    if (targetId) scrollToTarget(targetId);
+    // Close any open dropdown
+    document.querySelectorAll('.nav-dropdown.open').forEach(function(d) { d.classList.remove('open'); });
+  });
+});
+
+// Hamburger toggle
+var hamburgerBtn = document.getElementById('hamburgerBtn');
+var mobileMenu = document.getElementById('mobileMenu');
+
+hamburgerBtn.addEventListener('click', function() {
+  this.classList.toggle('active');
+  mobileMenu.classList.toggle('open');
+  document.body.style.overflow = mobileMenu.classList.contains('open') ? 'hidden' : '';
+});
+
+// Mobile menu item clicks
+document.querySelectorAll('.mobile-menu-item[data-target]').forEach(function(item) {
+  item.addEventListener('click', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    var targetId = this.getAttribute('data-target');
+    // Close mobile menu
+    hamburgerBtn.classList.remove('active');
+    mobileMenu.classList.remove('open');
+    document.body.style.overflow = '';
+    // Scroll after a brief delay to let menu close
+    setTimeout(function() { scrollToTarget(targetId); }, 100);
+  });
+});
+
+// Close dropdowns when clicking outside
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.nav-dropdown')) {
+    document.querySelectorAll('.nav-dropdown.open').forEach(function(d) { d.classList.remove('open'); });
+  }
+});
+
+// Close mobile menu on ESC
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape' && mobileMenu.classList.contains('open')) {
+    hamburgerBtn.classList.remove('active');
+    mobileMenu.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+});
+
+// ── Progress bar ──
+window.addEventListener('scroll', function() {
+  var scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+  var scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+  var progress = (scrollTop / scrollHeight) * 100;
+  document.getElementById('progressBar').style.width = progress + '%';
+});
+
+// ── Q&A toggle ──
+function toggleQA(el) {
+  el.closest('.qa-item').classList.toggle('open');
+}
+
+// ── TOC side dots ──
+var sections = document.querySelectorAll('.section, .hero');
+var tocContainer = document.getElementById('tocSidebar');
+
+sections.forEach(function(sec, i) {
+  var dot = document.createElement('div');
+  dot.className = 'toc-dot';
+  dot.title = sec.id || 'Section ' + i;
+  dot.addEventListener('click', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    scrollToTarget(sec.id);
+  });
+  tocContainer.appendChild(dot);
+});
+
+// ── Scroll spy — highlights active nav items, dots, and mobile items ──
+// Build lookup: section ID → which parent dropdown + which sub-items
+var sectionToNav = {};
+document.querySelectorAll('.nav-sub-item[data-target]').forEach(function(item) {
+  var tid = item.getAttribute('data-target');
+  sectionToNav[tid] = {
+    subItem: item,
+    dropdown: item.closest('.nav-dropdown')
+  };
+});
+
+var observer = new IntersectionObserver(function(entries) {
+  entries.forEach(function(entry) {
+    if (entry.isIntersecting) {
+      var idx = Array.from(sections).indexOf(entry.target);
+      var id = entry.target.id;
+
+      // TOC dots
+      document.querySelectorAll('.toc-dot').forEach(function(d, i) {
+        d.classList.toggle('active', i === idx);
+      });
+
+      // Desktop nav: clear all active states
+      document.querySelectorAll('.nav-sub-item.active, .nav-item.active').forEach(function(el) {
+        el.classList.remove('active');
+      });
+
+      // Highlight matching sub-item + parent dropdown trigger
+      if (sectionToNav[id]) {
+        sectionToNav[id].subItem.classList.add('active');
+        var trigger = sectionToNav[id].dropdown.querySelector(':scope > .nav-item');
+        if (trigger) trigger.classList.add('active');
+      }
+      // Direct nav items (Home)
+      var directItem = document.querySelector('.nav-item[data-target="' + id + '"]');
+      if (directItem) directItem.classList.add('active');
+
+      // Mobile menu
+      document.querySelectorAll('.mobile-menu-item.active').forEach(function(el) { el.classList.remove('active'); });
+      var mobileItem = document.querySelector('.mobile-menu-item[data-target="' + id + '"]');
+      if (mobileItem) mobileItem.classList.add('active');
+    }
+  });
+}, { rootMargin: '-20% 0px -70% 0px' });
+
+sections.forEach(function(s) { observer.observe(s); });
+</script>
+</body>
+</html>
