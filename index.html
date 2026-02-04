@@ -456,7 +456,9 @@ ul.clean-list li::before { content: '→'; position: absolute; left: 0; color: v
         <div class="dropdown-label">Learn the Basics</div>
         <span class="nav-sub-item" data-target="what-is-kimball">What Is Kimball</span>
         <span class="nav-sub-item" data-target="core-concepts">Core Concepts</span>
+        <span class="nav-sub-item" data-target="kimball-lifecycle">Kimball Lifecycle</span>
         <span class="nav-sub-item" data-target="four-step">4-Step Design Process</span>
+        <span class="nav-sub-item" data-target="bus-matrix">Bus Matrix</span>
       </div>
     </div>
 
@@ -466,6 +468,7 @@ ul.clean-list li::before { content: '→'; position: absolute; left: 0; color: v
         <div class="dropdown-label">Architecture Face-Offs</div>
         <span class="nav-sub-item" data-target="kimball-vs-inmon">Kimball vs. Inmon</span>
         <span class="nav-sub-item" data-target="kimball-vs-medallion">Kimball vs. Medallion</span>
+        <span class="nav-sub-item" data-target="data-vault">Kimball vs. Data Vault</span>
         <span class="nav-sub-item" data-target="pros-cons">Pros &amp; Cons</span>
       </div>
     </div>
@@ -497,6 +500,7 @@ ul.clean-list li::before { content: '→'; position: absolute; left: 0; color: v
       <div class="nav-dropdown-menu">
         <div class="dropdown-label">Apply It</div>
         <span class="nav-sub-item" data-target="dbt-impl">dbt Implementation</span>
+        <span class="nav-sub-item" data-target="etl-patterns">ETL/ELT Patterns</span>
         <span class="nav-sub-item" data-target="naming">Naming Conventions</span>
         <span class="nav-sub-item" data-target="testing">Testing &amp; Quality</span>
         <span class="nav-sub-item" data-target="exercises">Hands-On Exercises</span>
@@ -507,6 +511,8 @@ ul.clean-list li::before { content: '→'; position: absolute; left: 0; color: v
       <span class="nav-item">Reference</span>
       <div class="nav-dropdown-menu">
         <div class="dropdown-label">Quick Access</div>
+        <span class="nav-sub-item" data-target="semantic-layer">Semantic &amp; Metrics Layer</span>
+        <span class="nav-sub-item" data-target="performance-tuning">Performance Tuning</span>
         <span class="nav-sub-item" data-target="best-practices">Best Practices</span>
         <span class="nav-sub-item" data-target="cheatsheet">Cheat Sheet</span>
         <span class="nav-sub-item" data-target="qa">Q&amp;A (25 Questions)</span>
@@ -530,12 +536,15 @@ ul.clean-list li::before { content: '→'; position: absolute; left: 0; color: v
     <div class="mobile-menu-label">Foundations</div>
     <span class="mobile-menu-item" data-target="what-is-kimball">What Is Kimball</span>
     <span class="mobile-menu-item" data-target="core-concepts">Core Concepts</span>
+    <span class="mobile-menu-item" data-target="kimball-lifecycle">Kimball Lifecycle</span>
     <span class="mobile-menu-item" data-target="four-step">4-Step Design Process</span>
+    <span class="mobile-menu-item" data-target="bus-matrix">Bus Matrix</span>
   </div>
   <div class="mobile-menu-group">
     <div class="mobile-menu-label">Comparisons</div>
     <span class="mobile-menu-item" data-target="kimball-vs-inmon">Kimball vs. Inmon</span>
     <span class="mobile-menu-item" data-target="kimball-vs-medallion">Kimball vs. Medallion</span>
+    <span class="mobile-menu-item" data-target="data-vault">Kimball vs. Data Vault</span>
     <span class="mobile-menu-item" data-target="pros-cons">Pros &amp; Cons</span>
   </div>
   <div class="mobile-menu-group">
@@ -555,12 +564,15 @@ ul.clean-list li::before { content: '→'; position: absolute; left: 0; color: v
   <div class="mobile-menu-group">
     <div class="mobile-menu-label">Practical</div>
     <span class="mobile-menu-item" data-target="dbt-impl">dbt Implementation</span>
+    <span class="mobile-menu-item" data-target="etl-patterns">ETL/ELT Patterns</span>
     <span class="mobile-menu-item" data-target="naming">Naming Conventions</span>
     <span class="mobile-menu-item" data-target="testing">Testing &amp; Quality</span>
     <span class="mobile-menu-item" data-target="exercises">Hands-On Exercises</span>
   </div>
   <div class="mobile-menu-group">
     <div class="mobile-menu-label">Reference</div>
+    <span class="mobile-menu-item" data-target="semantic-layer">Semantic &amp; Metrics Layer</span>
+    <span class="mobile-menu-item" data-target="performance-tuning">Performance Tuning</span>
     <span class="mobile-menu-item" data-target="best-practices">Best Practices</span>
     <span class="mobile-menu-item" data-target="cheatsheet">Cheat Sheet</span>
     <span class="mobile-menu-item" data-target="qa">Q&amp;A (25 Questions)</span>
@@ -581,7 +593,7 @@ ul.clean-list li::before { content: '→'; position: absolute; left: 0; color: v
       The definitive guide to building analytics-ready data warehouses. From foundational concepts and relatable analogies to real-world e-commerce implementations and hands-on exercises — everything you need to think dimensionally and <strong>apply it on Day 1</strong>.
     </p>
     <div class="hero-meta">
-      <div class="hero-meta-item"><div class="icon" style="background:var(--accent-gold-dim);color:var(--accent-gold);">📖</div><span>22 Sections</span></div>
+      <div class="hero-meta-item"><div class="icon" style="background:var(--accent-gold-dim);color:var(--accent-gold);">📖</div><span>27 Sections</span></div>
       <div class="hero-meta-item"><div class="icon" style="background:var(--accent-blue-dim);color:var(--accent-blue);">🎯</div><span>5 Complexity Levels</span></div>
       <div class="hero-meta-item"><div class="icon" style="background:var(--accent-teal-dim);color:var(--accent-teal);">🏗️</div><span>Real Case Study</span></div>
       <div class="hero-meta-item"><div class="icon" style="background:var(--accent-purple-dim);color:var(--accent-purple);">🛠️</div><span>dbt + Exercises</span></div>
@@ -907,10 +919,147 @@ ul.clean-list li::before { content: '→'; position: absolute; left: 0; color: v
   </div>
 </section>
 
+
+<!-- ═══════════ NEW — DATA VAULT COMPARISON ═══════════ -->
+<section class="section" id="data-vault">
+  <div class="section-header">
+    <div class="section-number">Section 05</div>
+    <h2 class="section-title">Kimball vs. Data Vault</h2>
+    <div class="section-divider"></div>
+    <p class="section-subtitle">The third major modeling paradigm — designed for auditability and agility at enterprise scale.</p>
+  </div>
+
+  <div class="grid-2">
+    <div class="card gold card-wide">
+      <div class="card-icon" style="background:var(--accent-gold-dim);color:var(--accent-gold);">⭐</div>
+      <h3>Kimball Dimensional Model</h3>
+      <ul class="clean-list">
+        <li><strong>Core pattern:</strong> Star schemas (facts + dimensions)</li>
+        <li><strong>Design driver:</strong> Business process analysis</li>
+        <li><strong>Optimized for:</strong> Query performance &amp; analyst usability</li>
+        <li><strong>Loading:</strong> Transform-heavy (get it right before loading)</li>
+        <li><strong>History:</strong> SCD Types (explicit design choice per attribute)</li>
+        <li><strong>Schema changes:</strong> Requires careful refactoring</li>
+      </ul>
+    </div>
+    <div class="card teal card-wide">
+      <div class="card-icon" style="background:var(--accent-teal-dim);color:var(--accent-teal);">🏛️</div>
+      <h3>Data Vault 2.0</h3>
+      <ul class="clean-list">
+        <li><strong>Core pattern:</strong> Hubs, Links, and Satellites</li>
+        <li><strong>Design driver:</strong> Business keys &amp; relationships</li>
+        <li><strong>Optimized for:</strong> Auditability, agility &amp; parallel loading</li>
+        <li><strong>Loading:</strong> Insert-only (never update, always append)</li>
+        <li><strong>History:</strong> Automatic — every change creates a new satellite row</li>
+        <li><strong>Schema changes:</strong> Add new satellites without touching existing tables</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="diagram-container" style="margin-top:2rem;">
+    <div class="diagram-title">Data Vault Building Blocks</div>
+    <div class="grid-3" style="margin:1.5rem 0;">
+      <div class="card blue" style="text-align:center;">
+        <h3 style="color:var(--accent-blue);">🔵 Hub</h3>
+        <p>Business key + surrogate key + load timestamp. Represents a core business entity (Customer, Product, Order). <strong>Never changes</strong> once inserted.</p>
+        <div class="code-block" style="margin-top:0.75rem;"><pre>hub_customer
+├── hub_customer_key (hash)
+├── customer_bk  (business key)
+├── load_date
+└── record_source</pre></div>
+      </div>
+      <div class="card purple" style="text-align:center;">
+        <h3 style="color:var(--accent-purple);">🔗 Link</h3>
+        <p>Captures <strong>relationships</strong> between Hubs. Many-to-many by default. Also insert-only.</p>
+        <div class="code-block" style="margin-top:0.75rem;"><pre>link_order_customer
+├── link_order_cust_key (hash)
+├── hub_order_key (FK)
+├── hub_customer_key (FK)
+├── load_date
+└── record_source</pre></div>
+      </div>
+      <div class="card rose" style="text-align:center;">
+        <h3 style="color:var(--accent-rose);">🛰️ Satellite</h3>
+        <p>Stores <strong>descriptive attributes</strong> + history. New row on every change. Attached to a Hub or Link.</p>
+        <div class="code-block" style="margin-top:0.75rem;"><pre>sat_customer_details
+├── hub_customer_key (FK)
+├── load_date (PK part)
+├── customer_name
+├── email, city, segment
+├── hash_diff
+└── record_source</pre></div>
+      </div>
+    </div>
+  </div>
+
+  <h4 style="font-family:'Playfair Display',serif;margin:2.5rem 0 1.5rem;font-size:1.4rem;">Detailed Comparison</h4>
+  <div class="card blue card-wide">
+    <table class="styled-table">
+      <thead>
+        <tr><th>Aspect</th><th>Kimball</th><th>Data Vault 2.0</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Core tables</strong></td><td>Facts + Dimensions</td><td>Hubs + Links + Satellites</td></tr>
+        <tr><td><strong>Primary key strategy</strong></td><td>Integer surrogate keys</td><td>Hash keys (MD5/SHA) of business keys</td></tr>
+        <tr><td><strong>Normalization</strong></td><td>Denormalized dimensions</td><td>Highly normalized (3NF+)</td></tr>
+        <tr><td><strong>History tracking</strong></td><td>Explicit SCD types per attribute</td><td>Automatic — every satellite insert is history</td></tr>
+        <tr><td><strong>Load pattern</strong></td><td>Upsert / merge (SCD logic)</td><td>Insert-only (append, never update)</td></tr>
+        <tr><td><strong>Parallel loading</strong></td><td>Dimensions before facts (dependency)</td><td>Hubs, Links, Satellites load independently</td></tr>
+        <tr><td><strong>Query complexity</strong></td><td>Simple — 1 fact + N dims via FK</td><td>Complex — many joins through Hubs/Links/Sats</td></tr>
+        <tr><td><strong>End-user friendliness</strong></td><td>⭐ Excellent — analysts self-serve</td><td>Needs a "Business Vault" or presentation layer</td></tr>
+        <tr><td><strong>Agility to source changes</strong></td><td>Medium — schema changes ripple</td><td>⭐ High — add new Satellites without impact</td></tr>
+        <tr><td><strong>Auditability</strong></td><td>Good (with SCD2 + snapshots)</td><td>⭐ Excellent — full lineage by design</td></tr>
+        <tr><td><strong>Best for</strong></td><td>BI &amp; analytics teams</td><td>Enterprise data integration, regulated industries</td></tr>
+        <tr><td><strong>Typical pairing</strong></td><td>dbt + Snowflake/BigQuery + Looker</td><td>dbt (with dbtvault) + Snowflake + presentation layer</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout callout-key" style="margin-top:2rem;">
+    <h4>🔑 Key Insight: Different Layers, Not Competitors</h4>
+    <p>In practice, many enterprise teams use <strong>Data Vault as the integration layer</strong> (raw vault = single source of truth with full history) and then build <strong>Kimball star schemas as the presentation layer</strong> on top for BI consumption. Data Vault feeds Kimball — they're complementary, not mutually exclusive.</p>
+  </div>
+
+  <div class="grid-3" style="margin-top:2rem;">
+    <div class="card gold">
+      <h3>Choose Kimball When</h3>
+      <ul class="clean-list">
+        <li>Primary consumers are analysts/BI</li>
+        <li>Speed to delivery matters most</li>
+        <li>Team is small and pragmatic</li>
+        <li>Source systems are relatively stable</li>
+      </ul>
+    </div>
+    <div class="card teal">
+      <h3>Choose Data Vault When</h3>
+      <ul class="clean-list">
+        <li>Regulatory audit trails required</li>
+        <li>Many source systems changing often</li>
+        <li>Enterprise-scale with parallel teams</li>
+        <li>Full history of everything is non-negotiable</li>
+      </ul>
+    </div>
+    <div class="card purple">
+      <h3>Combine Both When</h3>
+      <ul class="clean-list">
+        <li>Large org with mixed needs</li>
+        <li>Raw Vault for integration/audit</li>
+        <li>Business Vault for business rules</li>
+        <li>Kimball stars as presentation layer</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="analogy-box">
+    <div class="analogy-title">Analogy — Filing Systems</div>
+    <p><strong>Kimball</strong> is like organizing files by <em>project</em>: everything for "Q4 Sales" in one folder — fast to find, but if a client appears in multiple projects, their info is duplicated. <strong>Data Vault</strong> is like organizing by <em>entity</em>: one folder per client, one per project, with cross-references linking them — perfectly auditable, but you need to follow links to assemble a complete picture. Most large offices use both: entity files for compliance, project folders for daily work.</p>
+  </div>
+</section>
+
 <!-- ═══════════ 04 — PROS & CONS ═══════════ -->
 <section class="section" id="pros-cons">
   <div class="section-header">
-    <div class="section-number">Section 05</div>
+    <div class="section-number">Section 06</div>
     <h2 class="section-title">Pros &amp; Cons of Kimball Architecture</h2>
     <div class="section-divider"></div>
     <p class="section-subtitle">An honest evaluation — every architecture has tradeoffs. Knowing them upfront helps you make the right choice.</p>
@@ -961,10 +1110,135 @@ ul.clean-list li::before { content: '→'; position: absolute; left: 0; color: v
   </div>
 </section>
 
+
+<!-- ═══════════ NEW — KIMBALL LIFECYCLE ═══════════ -->
+<section class="section" id="kimball-lifecycle">
+  <div class="section-header">
+    <div class="section-number">Section 07</div>
+    <h2 class="section-title">The Kimball Lifecycle</h2>
+    <div class="section-divider"></div>
+    <p class="section-subtitle">The full project methodology — dimensional modeling is just one piece of a larger framework.</p>
+  </div>
+
+  <div class="callout callout-info">
+    <h4>Beyond Just Data Modeling</h4>
+    <p>Kimball's methodology isn't only about star schemas. It's a <strong>complete project lifecycle</strong> covering everything from requirements gathering to deployment and maintenance. The 4-step design process (next section) fits inside the "Dimensional Modeling" track of this broader framework.</p>
+  </div>
+
+  <div class="diagram-container" style="margin-top:2rem;">
+    <div class="diagram-title">Kimball Lifecycle — Three Parallel Tracks</div>
+    <div class="flow-row" style="margin:1.5rem 0;flex-wrap:wrap;justify-content:center;">
+      <div class="flow-box" style="background:var(--accent-gold-dim);color:var(--accent-gold);border-color:rgba(240,197,91,0.3);min-width:160px;">
+        <strong>📋 Program/Project<br>Planning</strong>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box" style="background:var(--accent-blue-dim);color:var(--accent-blue);border-color:rgba(59,130,246,0.3);min-width:160px;">
+        <strong>🔍 Business Requirements<br>Definition</strong>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box" style="background:var(--accent-purple-dim);color:var(--accent-purple);border-color:rgba(167,139,250,0.3);min-width:280px;text-align:left;padding:1rem;">
+        <strong>Three Parallel Tracks:</strong><br>
+        <span style="font-size:0.8rem;">🔵 Technology Track<br>🟡 Data Track (Dimensional Modeling + ETL)<br>🟢 BI Application Track</span>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box" style="background:var(--accent-teal-dim);color:var(--accent-teal);border-color:rgba(45,212,191,0.3);min-width:160px;">
+        <strong>🚀 Deployment</strong>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box" style="background:var(--accent-rose-dim);color:var(--accent-rose);border-color:rgba(251,113,133,0.3);min-width:160px;">
+        <strong>🔄 Growth &amp;<br>Maintenance</strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-2" style="margin-top:2rem;">
+    <div class="card gold card-wide">
+      <h3 style="color:var(--accent-gold);">📋 Phase 1: Program/Project Planning</h3>
+      <ul class="clean-list">
+        <li><strong>Assess readiness:</strong> Does the org have executive sponsorship, budget, and the right team?</li>
+        <li><strong>Scope the iteration:</strong> Pick 1–2 business processes for the first release — don't boil the ocean</li>
+        <li><strong>Build the Bus Matrix:</strong> Map all processes × dimensions to plan the long-term roadmap</li>
+        <li><strong>Prioritize:</strong> Start with the process that has the highest business impact + data availability</li>
+      </ul>
+    </div>
+    <div class="card blue card-wide">
+      <h3 style="color:var(--accent-blue);">🔍 Phase 2: Business Requirements</h3>
+      <ul class="clean-list">
+        <li><strong>Interview business users</strong> — not IT. Ask: "What decisions do you make? What data do you wish you had?"</li>
+        <li><strong>Identify KPIs:</strong> Revenue, conversion rate, churn, inventory turns — these become your <em>facts</em></li>
+        <li><strong>Identify analysis dimensions:</strong> "By region, by product, by time" — these become your <em>dimensions</em></li>
+        <li><strong>Document data sources:</strong> Which systems hold this data? What's the refresh frequency?</li>
+      </ul>
+    </div>
+  </div>
+
+  <h4 style="font-family:'Playfair Display',serif;margin:2.5rem 0 1.5rem;font-size:1.4rem;">The Three Parallel Tracks</h4>
+  <div class="grid-3">
+    <div class="card blue">
+      <h3 style="color:var(--accent-blue);">🔵 Technology Track</h3>
+      <ul class="clean-list">
+        <li><strong>Architecture design:</strong> Choose cloud warehouse, ETL tool, BI platform</li>
+        <li><strong>Infrastructure setup:</strong> Environments (dev/staging/prod), security, networking</li>
+        <li><strong>Modern stack example:</strong> Snowflake + dbt + Looker + Fivetran</li>
+        <li><strong>Key decision:</strong> Build vs. buy for each component</li>
+      </ul>
+    </div>
+    <div class="card gold">
+      <h3 style="color:var(--accent-gold);">🟡 Data Track ⭐</h3>
+      <ul class="clean-list">
+        <li><strong>Dimensional modeling:</strong> The 4-step process (next section!) — this is the heart of Kimball</li>
+        <li><strong>Physical design:</strong> Partitioning, clustering, materialization strategy</li>
+        <li><strong>ETL/ELT design:</strong> Extraction, staging, transformation, loading, error handling</li>
+        <li><strong>Testing &amp; validation:</strong> Data quality checks, reconciliation with source</li>
+      </ul>
+    </div>
+    <div class="card teal">
+      <h3 style="color:var(--accent-teal);">🟢 BI Application Track</h3>
+      <ul class="clean-list">
+        <li><strong>Dashboard design:</strong> Mockups, KPI definitions, user personas</li>
+        <li><strong>Semantic layer:</strong> Define metrics, hierarchies, drill-paths in the BI tool</li>
+        <li><strong>User acceptance testing:</strong> Business users validate that numbers match expectations</li>
+        <li><strong>Training &amp; rollout:</strong> User documentation, workshops, support channels</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="grid-2" style="margin-top:1.5rem;">
+    <div class="card purple card-wide">
+      <h3 style="color:var(--accent-purple);">🚀 Phase 3: Deployment</h3>
+      <ul class="clean-list">
+        <li>Production cutover with monitoring and alerting</li>
+        <li>Parallel run: compare old reports vs. new for a validation period</li>
+        <li>User training workshops and self-service documentation</li>
+        <li>Establish SLAs for data freshness and query performance</li>
+      </ul>
+    </div>
+    <div class="card rose card-wide">
+      <h3 style="color:var(--accent-rose);">🔄 Phase 4: Growth &amp; Maintenance</h3>
+      <ul class="clean-list">
+        <li><strong>Add new stars:</strong> Pick the next process from the Bus Matrix and iterate</li>
+        <li><strong>Evolve existing models:</strong> Add dimensions, new measures, handle schema changes</li>
+        <li><strong>Performance tuning:</strong> Monitor query times, optimize materializations</li>
+        <li><strong>Data governance:</strong> Ownership, documentation, lineage, access control</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="callout callout-key" style="margin-top:2rem;">
+    <h4>🔑 Modern Adaptation</h4>
+    <p>Kimball's original lifecycle assumed waterfall-style multi-month projects. Modern teams run it in <strong>agile sprints</strong>: 2-week iterations, each delivering a tested, documented increment. dbt + CI/CD makes this natural — every PR is a small lifecycle iteration: model → test → document → deploy.</p>
+  </div>
+
+  <div class="analogy-box">
+    <div class="analogy-title">Analogy — Building a House</div>
+    <p>The Kimball Lifecycle is like a construction project. <strong>Planning</strong> = choosing the neighborhood and lot (scope). <strong>Requirements</strong> = the architect interviewing the family about bedrooms, kitchen style, budget. Then three crews work in parallel: <strong>structural</strong> (foundation, framing = technology), <strong>interior design</strong> (layout, fixtures = dimensional modeling + ETL), and <strong>landscaping</strong> (curb appeal = BI dashboards). You don't wait for the kitchen to be done before starting the roof — they progress together.</p>
+  </div>
+</section>
+
 <!-- ═══════════ 20 — FOUR-STEP PROCESS ═══════════ -->
 <section class="section" id="four-step">
   <div class="section-header">
-    <div class="section-number">Section 06</div>
+    <div class="section-number">Section 08</div>
     <h2 class="section-title">Kimball's 4-Step Design Process</h2>
     <div class="section-divider"></div>
     <p class="section-subtitle">Every dimensional model starts with these four sequential decisions.</p>
@@ -1009,10 +1283,90 @@ ul.clean-list li::before { content: '→'; position: absolute; left: 0; color: v
   </div>
 </section>
 
+
+<!-- ═══════════ NEW — BUS MATRIX ═══════════ -->
+<section class="section" id="bus-matrix">
+  <div class="section-header">
+    <div class="section-number">Section 09</div>
+    <h2 class="section-title">The Enterprise Bus Matrix</h2>
+    <div class="section-divider"></div>
+    <p class="section-subtitle">The master planning tool — a single grid that maps your entire data warehouse roadmap.</p>
+  </div>
+
+  <div class="callout callout-info">
+    <h4>What Is the Bus Matrix?</h4>
+    <p>A grid where <strong>rows = business processes</strong> (each becomes a fact table) and <strong>columns = dimensions</strong>. Checkmarks show which dimensions participate in each process. Shared columns are <strong>conformed dimensions</strong> — the glue that lets you query across multiple stars. It's both a <em>planning tool</em> (what to build and in what order) and a <em>communication tool</em> (showing stakeholders how everything connects).</p>
+  </div>
+
+  <h4 style="font-family:'Playfair Display',serif;margin:2.5rem 0 1.5rem;font-size:1.4rem;">Example: E-Commerce Company Bus Matrix</h4>
+  <div class="card blue card-wide">
+    <table class="styled-table" style="font-size:0.82rem;">
+      <thead>
+        <tr>
+          <th>Business Process (Fact)</th>
+          <th>Date</th><th>Customer</th><th>Product</th><th>Store/<br>Channel</th><th>Employee</th><th>Promotion</th><th>Supplier</th><th>Warehouse</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Online Orders</strong></td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td></td><td>✅</td><td></td><td>✅</td></tr>
+        <tr><td><strong>In-Store Sales</strong></td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td></td><td></td></tr>
+        <tr><td><strong>Returns</strong></td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td></td><td></td><td>✅</td></tr>
+        <tr><td><strong>Inventory Snapshots</strong></td><td>✅</td><td></td><td>✅</td><td></td><td></td><td></td><td>✅</td><td>✅</td></tr>
+        <tr><td><strong>Purchase Orders</strong></td><td>✅</td><td></td><td>✅</td><td></td><td>✅</td><td></td><td>✅</td><td>✅</td></tr>
+        <tr><td><strong>Customer Support</strong></td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td></td><td></td><td></td></tr>
+        <tr><td><strong>Marketing Campaigns</strong></td><td>✅</td><td>✅</td><td></td><td>✅</td><td></td><td>✅</td><td></td><td></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h4 style="font-family:'Playfair Display',serif;margin:2.5rem 0 1.5rem;font-size:1.4rem;">Reading the Bus Matrix</h4>
+  <div class="grid-3">
+    <div class="card gold">
+      <h3>Read Across (Rows)</h3>
+      <p>Each row defines one <strong>star schema</strong>. "Online Orders" connects to Date, Customer, Product, Channel, Promotion, and Warehouse dimensions.</p>
+    </div>
+    <div class="card teal">
+      <h3>Read Down (Columns)</h3>
+      <p>Columns with many checkmarks are <strong>conformed dimensions</strong>. Date (7/7 ✅) and Product (6/7 ✅) are the most shared — build these first.</p>
+    </div>
+    <div class="card purple">
+      <h3>Prioritize Delivery</h3>
+      <p>Start with the row that has the <strong>highest business value + best data quality</strong>. Each new row reuses existing conformed dims, so delivery accelerates over time.</p>
+    </div>
+  </div>
+
+  <h4 style="font-family:'Playfair Display',serif;margin:2.5rem 0 1.5rem;font-size:1.4rem;">How to Build Your Bus Matrix</h4>
+  <div class="card blue card-wide">
+    <table class="styled-table">
+      <thead>
+        <tr><th>Step</th><th>Action</th><th>Tip</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>1</strong></td><td>List all business processes (verbs: selling, shipping, returning, hiring)</td><td>Each process = one fact table = one row</td></tr>
+        <tr><td><strong>2</strong></td><td>List all dimensions (nouns: customer, product, date, location)</td><td>Each dimension = one column</td></tr>
+        <tr><td><strong>3</strong></td><td>Fill in the checkmarks — which dimensions participate in each process?</td><td>Interview business users, not IT</td></tr>
+        <tr><td><strong>4</strong></td><td>Identify conformed dimensions (columns with 3+ checkmarks)</td><td>These are your highest-priority builds</td></tr>
+        <tr><td><strong>5</strong></td><td>Prioritize rows by: business value × data readiness × # of conformed dims reused</td><td>First star should reuse max conformed dims</td></tr>
+        <tr><td><strong>6</strong></td><td>Iterate: build one star per sprint/cycle, growing the matrix over time</td><td>Each new star gets cheaper as dims are reused</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout callout-warning" style="margin-top:2rem;">
+    <h4>Common Bus Matrix Mistakes</h4>
+    <p><strong>Too granular:</strong> Don't list "revenue" and "quantity" as separate rows — those are <em>measures</em> within a single process. <strong>Too broad:</strong> Don't combine "online sales" and "in-store sales" into one row if they have different grains or dimensions. <strong>Missing processes:</strong> Don't forget non-revenue processes like inventory, support, and marketing — these are often the most valuable for cross-functional analysis.</p>
+  </div>
+
+  <div class="analogy-box">
+    <div class="analogy-title">Analogy — Airline Route Map</div>
+    <p>The Bus Matrix is like an airline's route map. Each <strong>row</strong> is a flight route (business process). Each <strong>column</strong> is an airport (dimension). Checkmarks show which airports a route connects. <strong>Hub airports</strong> (conformed dimensions like Date and Customer) appear on almost every route — invest in them first. Adding a new route is cheap if it connects existing hubs; building a new airport (non-conformed dimension) is expensive. The map lets the CEO see the whole network at a glance.</p>
+  </div>
+</section>
+
 <!-- ═══════════ 21 — STAR SCHEMA ═══════════ -->
 <section class="section" id="star-schema">
   <div class="section-header">
-    <div class="section-number">Section 07</div>
+    <div class="section-number">Section 10</div>
     <h2 class="section-title">The Star Schema</h2>
     <div class="section-divider"></div>
     <p class="section-subtitle">Kimball's signature model — simple, intuitive, blazing fast.</p>
@@ -1077,7 +1431,7 @@ ul.clean-list li::before { content: '→'; position: absolute; left: 0; color: v
 <!-- ═══════════ 20 — SNOWFLAKE SCHEMA ═══════════ -->
 <section class="section" id="snowflake-schema">
   <div class="section-header">
-    <div class="section-number">Section 08</div>
+    <div class="section-number">Section 11</div>
     <h2 class="section-title">The Snowflake Schema</h2>
     <div class="section-divider"></div>
     <p class="section-subtitle">When dimension tables are further normalized into sub-tables.</p>
@@ -1099,7 +1453,7 @@ ul.clean-list li::before { content: '→'; position: absolute; left: 0; color: v
 <!-- ═══════════ 21 — SCDs ═══════════ -->
 <section class="section" id="scd">
   <div class="section-header">
-    <div class="section-number">Section 09</div>
+    <div class="section-number">Section 12</div>
     <h2 class="section-title">Slowly Changing Dimensions (SCDs)</h2>
     <div class="section-divider"></div>
     <p class="section-subtitle">What happens when a customer moves, or a product gets re-categorized?</p>
@@ -1149,7 +1503,7 @@ ul.clean-list li::before { content: '→'; position: absolute; left: 0; color: v
 <!-- ═══════════ 20 — SIMPLE ═══════════ -->
 <section class="section" id="simple">
   <div class="section-header">
-    <div class="section-number">Section 10</div>
+    <div class="section-number">Section 13</div>
     <h2 class="section-title">Simple — Coffee Shop Sales</h2>
     <div class="section-divider"></div>
     <div class="level-badge level-simple" style="display:inline-flex;margin:0 auto;">☕ Beginner</div>
@@ -1193,7 +1547,7 @@ ul.clean-list li::before { content: '→'; position: absolute; left: 0; color: v
 <!-- ═══════════ 21 — MEDIUM ═══════════ -->
 <section class="section" id="medium">
   <div class="section-header">
-    <div class="section-number">Section 11</div>
+    <div class="section-number">Section 14</div>
     <h2 class="section-title">Medium — SaaS Subscription Platform</h2>
     <div class="section-divider"></div>
     <div class="level-badge level-medium" style="display:inline-flex;margin:0 auto;">💻 Intermediate</div>
@@ -1216,7 +1570,7 @@ ul.clean-list li::before { content: '→'; position: absolute; left: 0; color: v
 <!-- ═══════════ 20 — ADVANCED ═══════════ -->
 <section class="section" id="advanced">
   <div class="section-header">
-    <div class="section-number">Section 12</div>
+    <div class="section-number">Section 15</div>
     <h2 class="section-title">Advanced — Multi-Channel Retailer</h2>
     <div class="section-divider"></div>
     <div class="level-badge level-advanced" style="display:inline-flex;margin:0 auto;">🏬 Advanced</div>
@@ -1241,7 +1595,7 @@ ul.clean-list li::before { content: '→'; position: absolute; left: 0; color: v
 <!-- ═══════════ 21 — COMPLEX ═══════════ -->
 <section class="section" id="complex">
   <div class="section-header">
-    <div class="section-number">Section 13</div>
+    <div class="section-number">Section 16</div>
     <h2 class="section-title">Complex — Healthcare Claims Warehouse</h2>
     <div class="section-divider"></div>
     <div class="level-badge level-complex" style="display:inline-flex;margin:0 auto;">🏥 Expert</div>
@@ -1276,7 +1630,7 @@ ul.clean-list li::before { content: '→'; position: absolute; left: 0; color: v
 <!-- ═══════════ 20 — E-COMMERCE CASE STUDY ═══════════ -->
 <section class="section" id="ecommerce">
   <div class="section-header">
-    <div class="section-number">Section 14</div>
+    <div class="section-number">Section 17</div>
     <h2 class="section-title">Real-World — E-Commerce Dimensional Model</h2>
     <div class="section-divider"></div>
     <div class="level-badge level-real" style="display:inline-flex;margin:0 auto;">🛒 Production-Grade</div>
@@ -1351,7 +1705,7 @@ ul.clean-list li::before { content: '→'; position: absolute; left: 0; color: v
 <!-- ═══════════ 21 — dbt IMPLEMENTATION (NEW) ═══════════ -->
 <section class="section" id="dbt-impl">
   <div class="section-header">
-    <div class="section-number">Section 15</div>
+    <div class="section-number">Section 18</div>
     <h2 class="section-title">Implementing Kimball with dbt</h2>
     <div class="section-divider"></div>
     <p class="section-subtitle">Kimball as code — the modern way to build dimensional models. Copy these patterns directly into your dbt project.</p>
@@ -1565,10 +1919,184 @@ final <span class="kw">AS</span> (
   </div>
 </section>
 
+
+<!-- ═══════════ NEW — ETL/ELT LOADING PATTERNS ═══════════ -->
+<section class="section" id="etl-patterns">
+  <div class="section-header">
+    <div class="section-number">Section 19</div>
+    <h2 class="section-title">ETL/ELT Loading Patterns</h2>
+    <div class="section-divider"></div>
+    <p class="section-subtitle">How data actually gets into your star schemas — extraction, loading strategies, and handling edge cases.</p>
+  </div>
+
+  <div class="grid-2">
+    <div class="card gold card-wide">
+      <h3 style="color:var(--accent-gold);">Traditional ETL</h3>
+      <p><strong>Extract → Transform → Load</strong></p>
+      <ul class="clean-list">
+        <li>Data is cleaned and modeled <em>before</em> entering the warehouse</li>
+        <li>Transformation happens in a separate tool (Informatica, Talend, SSIS)</li>
+        <li>Warehouse stores only curated, analysis-ready data</li>
+        <li><strong>Pros:</strong> Clean warehouse, lower storage costs</li>
+        <li><strong>Cons:</strong> Slow iteration, hard to reprocess, vendor lock-in</li>
+      </ul>
+    </div>
+    <div class="card teal card-wide">
+      <h3 style="color:var(--accent-teal);">Modern ELT ⭐</h3>
+      <p><strong>Extract → Load → Transform</strong></p>
+      <ul class="clean-list">
+        <li>Raw data lands in the warehouse first, then transformed in-place</li>
+        <li>Transformation in SQL/dbt using the warehouse's compute power</li>
+        <li>Raw layer preserved for reprocessing and auditing</li>
+        <li><strong>Pros:</strong> Fast iteration, full history, dbt-native, cheaper compute</li>
+        <li><strong>Cons:</strong> Higher storage (raw + transformed), needs governance</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="callout callout-key" style="margin-top:2rem;">
+    <h4>🔑 Modern Standard: ELT with dbt</h4>
+    <p>The modern data stack uses ELT: <strong>Fivetran/Airbyte</strong> (Extract + Load raw data) → <strong>dbt</strong> (Transform in-warehouse) → <strong>Looker/Tableau</strong> (Consume). This is the dominant pattern for Kimball modeling today. All the dbt code in this presentation assumes ELT.</p>
+  </div>
+
+  <h4 style="font-family:'Playfair Display',serif;margin:2.5rem 0 1.5rem;font-size:1.4rem;">Dimension Loading Strategies</h4>
+  <div class="card blue card-wide">
+    <table class="styled-table">
+      <thead>
+        <tr><th>Strategy</th><th>How It Works</th><th>When to Use</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Full Refresh</strong></td>
+          <td>Truncate + reload the entire dimension every run</td>
+          <td>Small dims (&lt;100K rows), no SCD needed, source doesn't provide change flags</td>
+        </tr>
+        <tr>
+          <td><strong>Incremental (SCD1)</strong></td>
+          <td>MERGE/upsert: insert new rows, overwrite changed attributes</td>
+          <td>Medium dims, history not needed, corrections only</td>
+        </tr>
+        <tr>
+          <td><strong>SCD Type 2</strong></td>
+          <td>Close current row (set end_date, is_current=false), insert new version</td>
+          <td>When "as was" analysis matters: segment, address, tier, status</td>
+        </tr>
+        <tr>
+          <td><strong>dbt Snapshots</strong></td>
+          <td>dbt automatically detects changes and creates SCD2 rows</td>
+          <td>Modern dbt projects — handles SCD2 with minimal code</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h4 style="font-family:'Playfair Display',serif;margin:2.5rem 0 1.5rem;font-size:1.4rem;">Fact Loading Strategies</h4>
+  <div class="card blue card-wide">
+    <table class="styled-table">
+      <thead>
+        <tr><th>Strategy</th><th>How It Works</th><th>When to Use</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Append-Only</strong></td>
+          <td>Insert new rows only — never update existing facts</td>
+          <td>Transaction facts (sales, clicks, events) — most common</td>
+        </tr>
+        <tr>
+          <td><strong>Full Snapshot</strong></td>
+          <td>Capture complete state at each interval (daily, weekly)</td>
+          <td>Periodic snapshot facts (inventory levels, account balances)</td>
+        </tr>
+        <tr>
+          <td><strong>Incremental + MERGE</strong></td>
+          <td>Insert new rows + update existing rows when milestones are reached</td>
+          <td>Accumulating snapshot facts (order lifecycle: placed → shipped → delivered)</td>
+        </tr>
+        <tr>
+          <td><strong>dbt Incremental</strong></td>
+          <td><code>{{ config(materialized='incremental') }}</code> — dbt appends only new/changed rows</td>
+          <td>Large fact tables where full refresh is too slow</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h4 style="font-family:'Playfair Display',serif;margin:2.5rem 0 1.5rem;font-size:1.4rem;">Handling Edge Cases</h4>
+  <div class="grid-2">
+    <div class="card rose card-wide">
+      <h3 style="color:var(--accent-rose);">Late-Arriving Facts</h3>
+      <p>A transaction arrives <em>after</em> the batch window (e.g., a sale on Jan 31 arrives on Feb 3).</p>
+      <ul class="clean-list">
+        <li><strong>Solution:</strong> Always use the event's business date, not the load date, as the date FK</li>
+        <li>Incremental models should have a lookback window: <code>WHERE event_date >= current_date - 3</code></li>
+        <li>Idempotent loads: re-running the same batch produces the same result</li>
+      </ul>
+    </div>
+    <div class="card purple card-wide">
+      <h3 style="color:var(--accent-purple);">Late-Arriving Dimensions</h3>
+      <p>A fact row arrives referencing a dimension member that doesn't exist yet (e.g., new product sold before master data is synced).</p>
+      <ul class="clean-list">
+        <li><strong>Solution:</strong> Insert a placeholder row in the dimension (attributes = 'Unknown / Pending')</li>
+        <li>When the real data arrives, update the placeholder row (SCD1) or add a new version (SCD2)</li>
+        <li>The fact row's FK already points to the correct surrogate key — no fact updates needed</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="grid-2" style="margin-top:1rem;">
+    <div class="card gold card-wide">
+      <h3 style="color:var(--accent-gold);">Idempotent Loads</h3>
+      <p>Every load should be <strong>safely re-runnable</strong>. Running the same batch twice must not create duplicates or corrupt data.</p>
+      <ul class="clean-list">
+        <li>Use MERGE/upsert for dims, not blind INSERT</li>
+        <li>For facts: DELETE + INSERT for the batch window, or use dbt's <code>unique_key</code> config</li>
+        <li>Always include a <code>loaded_at</code> timestamp for debugging</li>
+      </ul>
+    </div>
+    <div class="card blue card-wide">
+      <h3 style="color:var(--accent-blue);">Error Handling &amp; Monitoring</h3>
+      <ul class="clean-list">
+        <li><strong>Row count alerts:</strong> If today's fact load is &lt;50% or &gt;200% of yesterday's — investigate</li>
+        <li><strong>Freshness checks:</strong> dbt <code>source freshness</code> tests alert if source data is stale</li>
+        <li><strong>Reconciliation:</strong> Compare warehouse totals vs. source system totals periodically</li>
+        <li><strong>Dead letter tables:</strong> Rows that fail validation go to a quarantine table for review</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="code-block" style="margin-top:2rem;">
+    <div class="code-label">dbt Incremental Fact Pattern</div>
+<pre>
+<span class="kw">{{</span> config(
+    materialized=<span class="st">'incremental'</span>,
+    unique_key=<span class="st">'order_line_key'</span>,
+    incremental_strategy=<span class="st">'merge'</span>
+) <span class="kw">}}</span>
+
+<span class="kw">SELECT</span>
+    <span class="kw">{{</span> dbt_utils.generate_surrogate_key([<span class="st">'order_id'</span>, <span class="st">'line_number'</span>]) <span class="kw">}}</span> <span class="kw">AS</span> order_line_key,
+    dim_date.date_key,
+    dim_customer.customer_key,
+    src.quantity,
+    src.unit_price,
+    src.quantity * src.unit_price <span class="kw">AS</span> line_total
+<span class="kw">FROM</span> <span class="kw">{{</span> ref(<span class="st">'stg_orders'</span>) <span class="kw">}}</span> src
+<span class="kw">LEFT JOIN</span> <span class="kw">{{</span> ref(<span class="st">'dim_date'</span>) <span class="kw">}}</span> <span class="kw">ON</span> src.order_date = dim_date.calendar_date
+<span class="kw">LEFT JOIN</span> <span class="kw">{{</span> ref(<span class="st">'dim_customer'</span>) <span class="kw">}}</span> <span class="kw">ON</span> src.customer_id = dim_customer.customer_id
+    <span class="kw">AND</span> dim_customer.is_current = <span class="kw">true</span>
+
+<span class="cm">-- Lookback window for late-arriving facts</span>
+<span class="kw">{% if</span> is_incremental() <span class="kw">%}</span>
+<span class="kw">WHERE</span> src.order_date >= (<span class="kw">SELECT</span> <span class="kw">MAX</span>(calendar_date) - <span class="kw">INTERVAL</span> <span class="st">'3 days'</span> <span class="kw">FROM</span> <span class="kw">{{</span> this <span class="kw">}}</span> t <span class="kw">JOIN</span> <span class="kw">{{</span> ref(<span class="st">'dim_date'</span>) <span class="kw">}}</span> d <span class="kw">ON</span> t.date_key = d.date_key)
+<span class="kw">{% endif %}</span>
+</pre>
+  </div>
+</section>
+
 <!-- ═══════════ 20 — NAMING CONVENTIONS (NEW) ═══════════ -->
 <section class="section" id="naming">
   <div class="section-header">
-    <div class="section-number">Section 16</div>
+    <div class="section-number">Section 20</div>
     <h2 class="section-title">Naming Conventions &amp; Standards</h2>
     <div class="section-divider"></div>
     <p class="section-subtitle">Consistent naming = readable queries = happy analysts. Adopt these standards on Day 1.</p>
@@ -1627,7 +2155,7 @@ final <span class="kw">AS</span> (
 <!-- ═══════════ 21 — TESTING & DATA QUALITY (NEW) ═══════════ -->
 <section class="section" id="testing">
   <div class="section-header">
-    <div class="section-number">Section 17</div>
+    <div class="section-number">Section 21</div>
     <h2 class="section-title">Testing &amp; Data Quality</h2>
     <div class="section-divider"></div>
     <p class="section-subtitle">A dimensional model without tests is a ticking time bomb. These checks keep your warehouse trustworthy.</p>
@@ -1684,7 +2212,7 @@ final <span class="kw">AS</span> (
 <!-- ═══════════ 20 — HANDS-ON EXERCISES (NEW) ═══════════ -->
 <section class="section" id="exercises">
   <div class="section-header">
-    <div class="section-number">Section 18</div>
+    <div class="section-number">Section 22</div>
     <h2 class="section-title">Hands-On Exercises</h2>
     <div class="section-divider"></div>
     <p class="section-subtitle">Practice these exercises to cement your understanding. Each builds on the previous one.</p>
@@ -1719,7 +2247,7 @@ final <span class="kw">AS</span> (
   <div class="exercise-box">
     <div class="exercise-title">Exercise 3: Write the SQL</div>
     <div class="exercise-difficulty"><span class="level-badge level-medium">Intermediate — 15 min</span></div>
-    <p>Using the coffee shop star schema from Section 10, write SQL queries to answer:</p>
+    <p>Using the coffee shop star schema from Section 13, write SQL queries to answer:</p>
     <ul class="clean-list" style="margin-top:0.75rem;">
       <li><strong>Q1:</strong> Which barista generated the most revenue last month?</li>
       <li><strong>Q2:</strong> What is the average transaction value by day of the week?</li>
@@ -1767,10 +2295,268 @@ is_current=true, eff_start='2023-01-15', eff_end='9999-12-31'</pre></div>
   </div>
 </section>
 
+
+
+<!-- ═══════════ NEW — SEMANTIC / METRICS LAYER ═══════════ -->
+<section class="section" id="semantic-layer">
+  <div class="section-header">
+    <div class="section-number">Section 23</div>
+    <h2 class="section-title">Semantic &amp; Metrics Layer</h2>
+    <div class="section-divider"></div>
+    <p class="section-subtitle">The bridge between your star schemas and your consumers — defining "one source of truth" for metrics.</p>
+  </div>
+
+  <div class="callout callout-info">
+    <h4>What Is a Semantic Layer?</h4>
+    <p>A semantic layer sits <strong>on top of your Kimball star schemas</strong> and provides a business-friendly abstraction: metric definitions, relationships, hierarchies, and access controls. It ensures that "revenue" means the same thing in every dashboard, API call, and AI query — regardless of who's asking or which tool they're using.</p>
+  </div>
+
+  <div class="diagram-container" style="margin-top:2rem;">
+    <div class="diagram-title">Where the Semantic Layer Sits</div>
+    <div class="flow-row" style="margin:1.5rem 0;flex-wrap:wrap;justify-content:center;">
+      <div class="flow-box" style="background:var(--accent-blue-dim);color:var(--accent-blue);border-color:rgba(59,130,246,0.3);">
+        <strong>📊 Sources</strong><br><span style="font-size:0.78rem;">Shopify, Stripe,<br>Salesforce, GA4</span>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box" style="background:var(--accent-purple-dim);color:var(--accent-purple);border-color:rgba(167,139,250,0.3);">
+        <strong>⚙️ dbt</strong><br><span style="font-size:0.78rem;">staging → intermediate<br>→ star schemas</span>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box" style="background:var(--accent-gold-dim);color:var(--accent-gold);border-color:rgba(240,197,91,0.3);">
+        <strong>🧠 Semantic Layer</strong><br><span style="font-size:0.78rem;">Metric definitions,<br>relationships, access</span>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box" style="background:var(--accent-teal-dim);color:var(--accent-teal);border-color:rgba(45,212,191,0.3);">
+        <strong>📱 Consumers</strong><br><span style="font-size:0.78rem;">Dashboards, AI/LLM,<br>APIs, Notebooks</span>
+      </div>
+    </div>
+  </div>
+
+  <h4 style="font-family:'Playfair Display',serif;margin:2.5rem 0 1.5rem;font-size:1.4rem;">Why Kimball + Semantic Layer Is Powerful</h4>
+  <div class="grid-2">
+    <div class="card rose card-wide">
+      <h3 style="color:var(--accent-rose);">Without Semantic Layer</h3>
+      <ul class="clean-list">
+        <li>Dashboard A calculates revenue as <code>SUM(line_total)</code></li>
+        <li>Dashboard B calculates revenue as <code>SUM(line_total) - SUM(discount)</code></li>
+        <li>AI chatbot generates its own SQL with a third definition</li>
+        <li>CFO asks "which number is right?" → <strong>nobody knows</strong></li>
+      </ul>
+    </div>
+    <div class="card teal card-wide">
+      <h3 style="color:var(--accent-teal);">With Semantic Layer ⭐</h3>
+      <ul class="clean-list">
+        <li>"Net Revenue" is defined <em>once</em>: <code>SUM(line_total - discount_amount)</code></li>
+        <li>Every consumer — dashboards, AI, APIs — uses the <strong>same definition</strong></li>
+        <li>Changes propagate everywhere automatically</li>
+        <li>CFO gets <strong>one consistent number</strong> everywhere</li>
+      </ul>
+    </div>
+  </div>
+
+  <h4 style="font-family:'Playfair Display',serif;margin:2.5rem 0 1.5rem;font-size:1.4rem;">Popular Semantic Layer Tools</h4>
+  <div class="card blue card-wide">
+    <table class="styled-table">
+      <thead>
+        <tr><th>Tool</th><th>Type</th><th>Key Strength</th><th>Best With</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>dbt Metrics / MetricFlow</strong></td><td>Code-first (YAML)</td><td>Version-controlled, integrated with dbt</td><td>dbt Core / dbt Cloud</td></tr>
+        <tr><td><strong>Cube</strong></td><td>Universal semantic layer</td><td>Multi-tool: serves BI, AI, APIs simultaneously</td><td>Any warehouse + any BI tool</td></tr>
+        <tr><td><strong>Looker (LookML)</strong></td><td>Embedded in BI tool</td><td>Mature, governed, strong for enterprise</td><td>Looker / Google Cloud</td></tr>
+        <tr><td><strong>AtScale</strong></td><td>Virtual OLAP</td><td>MDX/DAX compatibility, Excel pivot tables</td><td>Enterprise BI (Power BI, Tableau)</td></tr>
+        <tr><td><strong>Lightdash / Mode</strong></td><td>BI with metrics</td><td>Lightweight, dbt-native metric support</td><td>Startup / growth analytics teams</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h4 style="font-family:'Playfair Display',serif;margin:2.5rem 0 1.5rem;font-size:1.4rem;">How Metrics Map to Kimball Concepts</h4>
+  <div class="card blue card-wide">
+    <table class="styled-table">
+      <thead>
+        <tr><th>Kimball Concept</th><th>Semantic Layer Equivalent</th><th>Example</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Fact table measure</td><td>Metric definition</td><td><code>net_revenue = SUM(fct_order_lines.line_total - fct_order_lines.discount)</code></td></tr>
+        <tr><td>Dimension attribute</td><td>Dimension / entity property</td><td><code>dim_customer.loyalty_tier</code></td></tr>
+        <tr><td>Dimension hierarchy</td><td>Drill-down path</td><td><code>category → subcategory → product</code></td></tr>
+        <tr><td>Conformed dimension</td><td>Shared / joined entity</td><td><code>dim_date</code> used across all metrics</td></tr>
+        <tr><td>Grain</td><td>Metric granularity</td><td>"daily revenue per product" → time_grains: [day, week, month]</td></tr>
+        <tr><td>Additive / semi-additive</td><td>Aggregation type</td><td><code>type: sum</code> vs <code>type: average</code> vs <code>type: count_distinct</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout callout-key" style="margin-top:2rem;">
+    <h4>🔑 AI/LLM Connection</h4>
+    <p>The semantic layer is the <strong>secret weapon for text-to-SQL and AI analytics</strong>. When an LLM can query a semantic layer instead of writing raw SQL against star schemas, it gets: pre-defined metric logic, validated join paths, access-controlled data, and business-friendly naming. This is why Kimball + semantic layer is becoming the gold standard for AI-powered analytics.</p>
+  </div>
+
+  <div class="analogy-box">
+    <div class="analogy-title">Analogy — Restaurant Menu</div>
+    <p>Your star schemas are the <strong>kitchen</strong> — ingredients organized and prepped. The semantic layer is the <strong>menu</strong> — it translates kitchen internals into customer-friendly descriptions. The customer (dashboard, AI, analyst) orders "Margherita Pizza" (a metric) without knowing the exact recipe. If the chef changes suppliers (source system change) or tweaks the recipe (metric logic update), the menu item name stays the same and all customers get the improved version automatically.</p>
+  </div>
+</section>
+
+<!-- ═══════════ NEW — PERFORMANCE TUNING ═══════════ -->
+<section class="section" id="performance-tuning">
+  <div class="section-header">
+    <div class="section-number">Section 24</div>
+    <h2 class="section-title">Performance Tuning for Star Schemas</h2>
+    <div class="section-divider"></div>
+    <p class="section-subtitle">Making your dimensional models fast in production — partitioning, clustering, materialization, and query optimization.</p>
+  </div>
+
+  <h4 style="font-family:'Playfair Display',serif;margin:1rem 0 1.5rem;font-size:1.4rem;">Physical Design Strategies</h4>
+  <div class="grid-2">
+    <div class="card blue card-wide">
+      <h3 style="color:var(--accent-blue);">📦 Partitioning</h3>
+      <p>Split large tables into smaller physical segments based on a key column.</p>
+      <ul class="clean-list">
+        <li><strong>Fact tables:</strong> Partition by date (month/day) — most queries filter by time range</li>
+        <li><strong>Effect:</strong> Query scans only relevant partitions, skipping 90%+ of data</li>
+        <li><strong>BigQuery:</strong> <code>PARTITION BY DATE(order_date)</code></li>
+        <li><strong>Snowflake:</strong> Automatic micro-partitioning (no manual config needed)</li>
+        <li><strong>Rule of thumb:</strong> Partition when table exceeds 1 billion rows or 1 TB</li>
+      </ul>
+    </div>
+    <div class="card purple card-wide">
+      <h3 style="color:var(--accent-purple);">🗂️ Clustering / Sort Keys</h3>
+      <p>Organize data within partitions for efficient filtering and joining.</p>
+      <ul class="clean-list">
+        <li><strong>Fact tables:</strong> Cluster on most-filtered dimension keys (date_key, customer_key)</li>
+        <li><strong>Dimension tables:</strong> Cluster on business key or most-queried attributes</li>
+        <li><strong>BigQuery:</strong> <code>CLUSTER BY customer_key, product_key</code></li>
+        <li><strong>Snowflake:</strong> <code>CLUSTER BY (date_key, channel_key)</code></li>
+        <li><strong>Max 3-4 cluster keys</strong> — diminishing returns beyond that</li>
+      </ul>
+    </div>
+  </div>
+
+  <h4 style="font-family:'Playfair Display',serif;margin:2.5rem 0 1.5rem;font-size:1.4rem;">Materialization Strategy</h4>
+  <div class="card blue card-wide">
+    <table class="styled-table">
+      <thead>
+        <tr><th>Materialization</th><th>What It Does</th><th>Best For</th><th>Cost</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>View</strong></td>
+          <td>SQL definition only — computed on every query</td>
+          <td>Staging models, light transforms, rarely-queried models</td>
+          <td>Zero storage, high compute per query</td>
+        </tr>
+        <tr>
+          <td><strong>Table</strong></td>
+          <td>Fully materialized — rebuilt from scratch each dbt run</td>
+          <td>Dimensions (usually small), lookup tables</td>
+          <td>Full storage, full rebuild time</td>
+        </tr>
+        <tr>
+          <td><strong>Incremental</strong></td>
+          <td>Only processes new/changed rows</td>
+          <td>Large fact tables (millions+ rows) — the star pattern</td>
+          <td>Low rebuild time, needs careful design</td>
+        </tr>
+        <tr>
+          <td><strong>Materialized View</strong></td>
+          <td>Auto-refreshed by the warehouse engine</td>
+          <td>Aggregate tables, frequently-queried summaries</td>
+          <td>Storage + auto-refresh compute</td>
+        </tr>
+        <tr>
+          <td><strong>Ephemeral</strong></td>
+          <td>CTEs compiled into downstream models</td>
+          <td>Reusable intermediate logic (not persisted)</td>
+          <td>Zero storage, zero standalone cost</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="code-block" style="margin-top:2rem;">
+    <div class="code-label">Recommended dbt Materialization by Layer</div>
+<pre>
+<span class="cm"># dbt_project.yml</span>
+models:
+  my_project:
+    staging:
+      +materialized: <span class="st">view</span>           <span class="cm"># Light transforms, cheap</span>
+    intermediate:
+      +materialized: <span class="st">ephemeral</span>      <span class="cm"># CTEs, no extra tables</span>
+    marts:
+      dims:
+        +materialized: <span class="st">table</span>        <span class="cm"># Small, full refresh OK</span>
+      facts:
+        +materialized: <span class="st">incremental</span>   <span class="cm"># Large, append-heavy</span>
+      aggregates:
+        +materialized: <span class="st">table</span>        <span class="cm"># Or materialized_view</span>
+</pre>
+  </div>
+
+  <h4 style="font-family:'Playfair Display',serif;margin:2.5rem 0 1.5rem;font-size:1.4rem;">Query Optimization Techniques</h4>
+  <div class="grid-3">
+    <div class="card gold">
+      <h3>Aggregate Tables</h3>
+      <ul class="clean-list">
+        <li>Pre-compute common rollups: daily → monthly → yearly</li>
+        <li>Dashboard hitting <code>fct_order_lines</code> 500M rows? Build <code>fct_orders_monthly</code></li>
+        <li><strong>Always keep atomic grain</strong> — aggregates are additions, not replacements</li>
+        <li>Some BI tools auto-route to the right agg level</li>
+      </ul>
+    </div>
+    <div class="card teal">
+      <h3>Join Optimization</h3>
+      <ul class="clean-list">
+        <li>Star schema = few joins (1 fact + N dims) — already optimized</li>
+        <li>Use integer/hash surrogate keys — faster than string joins</li>
+        <li>Filter on the fact table <em>first</em>, then join dims</li>
+        <li>Avoid <code>SELECT *</code> — columnar stores only read requested columns</li>
+      </ul>
+    </div>
+    <div class="card rose">
+      <h3>BI Layer Tricks</h3>
+      <ul class="clean-list">
+        <li><strong>Extracts/caches:</strong> Tableau extracts, Looker PDTs for heavy dashboards</li>
+        <li><strong>Query tagging:</strong> Tag queries by dashboard/user for cost attribution</li>
+        <li><strong>Result caching:</strong> Snowflake caches identical queries for 24h for free</li>
+        <li><strong>Warehouse sizing:</strong> Scale up for heavy transforms, scale down for BI queries</li>
+      </ul>
+    </div>
+  </div>
+
+  <h4 style="font-family:'Playfair Display',serif;margin:2.5rem 0 1.5rem;font-size:1.4rem;">Performance Anti-Patterns to Avoid</h4>
+  <div class="card rose card-wide">
+    <table class="styled-table">
+      <thead>
+        <tr><th>Anti-Pattern</th><th>Why It Hurts</th><th>Fix</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Full table scan on facts</strong></td><td>Scans 500M+ rows every query</td><td>Always filter by date partition + cluster keys</td></tr>
+        <tr><td><strong>SELECT * FROM fact</strong></td><td>Reads all columns in columnar store</td><td>Select only needed columns</td></tr>
+        <tr><td><strong>String-based joins</strong></td><td>Comparing varchar is 3-5× slower than int/hash</td><td>Use surrogate integer or hash keys for joins</td></tr>
+        <tr><td><strong>No incremental on large facts</strong></td><td>Rebuilds 500M rows daily when only 50K are new</td><td>Use dbt incremental with merge strategy</td></tr>
+        <tr><td><strong>Over-normalized (snowflake) dims</strong></td><td>Extra joins for every query, no performance gain</td><td>Denormalize into star schema — storage is cheap</td></tr>
+        <tr><td><strong>Too many materializations</strong></td><td>Warehouse filled with unused tables eating storage + refresh time</td><td>Audit unused models quarterly, convert to views</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout callout-key" style="margin-top:2rem;">
+    <h4>🔑 The 80/20 Rule of Performance</h4>
+    <p>In most Kimball implementations, <strong>80% of performance gains</strong> come from three things: (1) partitioning facts by date, (2) using incremental materializations for large facts, and (3) building 2-3 aggregate tables for the heaviest dashboards. Everything else is optimization at the margins. Get these three right before pursuing exotic tuning.</p>
+  </div>
+
+  <div class="analogy-box">
+    <div class="analogy-title">Analogy — Library Organization</div>
+    <p><strong>Partitioning</strong> is organizing books by floor (Fiction floor 1, Non-fiction floor 2) — you go directly to the right floor. <strong>Clustering</strong> is alphabetizing within each floor — you find the exact shelf fast. <strong>Aggregate tables</strong> are the "Popular Picks" display at the entrance — the 20 most-requested books without searching the stacks. <strong>Materialized views</strong> are pre-compiled reading lists that auto-update when new books arrive.</p>
+  </div>
+</section>
+
 <!-- ═══════════ 21 — BEST PRACTICES ═══════════ -->
 <section class="section" id="best-practices">
   <div class="section-header">
-    <div class="section-number">Section 19</div>
+    <div class="section-number">Section 25</div>
     <h2 class="section-title">Best Practices &amp; Anti-Patterns</h2>
     <div class="section-divider"></div>
   </div>
@@ -1811,7 +2597,7 @@ is_current=true, eff_start='2023-01-15', eff_end='9999-12-31'</pre></div>
 <!-- ═══════════ 20 — CHEAT SHEET (NEW) ═══════════ -->
 <section class="section" id="cheatsheet">
   <div class="section-header">
-    <div class="section-number">Section 20</div>
+    <div class="section-number">Section 26</div>
     <h2 class="section-title">Quick Reference Cheat Sheet</h2>
     <div class="section-divider"></div>
     <p class="section-subtitle">Print this. Pin it above your desk. Reference it during every modeling session.</p>
@@ -1900,7 +2686,7 @@ is_current=true, eff_start='2023-01-15', eff_end='9999-12-31'</pre></div>
 <!-- ═══════════ 21 — Q&A ═══════════ -->
 <section class="section" id="qa">
   <div class="section-header">
-    <div class="section-number">Section 21</div>
+    <div class="section-number">Section 27</div>
     <h2 class="section-title">Comprehensive Q&amp;A</h2>
     <div class="section-divider"></div>
     <p class="section-subtitle">25 questions covering beginner to expert topics.</p>
