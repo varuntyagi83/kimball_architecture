@@ -481,6 +481,8 @@ ul.clean-list li::before { content: '→'; position: absolute; left: 0; color: v
         <span class="nav-sub-item" data-target="star-schema">Star Schema</span>
         <span class="nav-sub-item" data-target="snowflake-schema">Snowflake Schema</span>
         <span class="nav-sub-item" data-target="scd">Slowly Changing Dims</span>
+        <span class="nav-sub-item" data-target="conformed-dims">Conformed Dimensions</span>
+        <span class="nav-sub-item" data-target="role-playing-dims">Role-Playing Dimensions</span>
       </div>
     </div>
 
@@ -553,6 +555,8 @@ ul.clean-list li::before { content: '→'; position: absolute; left: 0; color: v
     <span class="mobile-menu-item" data-target="star-schema">Star Schema</span>
     <span class="mobile-menu-item" data-target="snowflake-schema">Snowflake Schema</span>
     <span class="mobile-menu-item" data-target="scd">Slowly Changing Dimensions</span>
+    <span class="mobile-menu-item" data-target="conformed-dims">Conformed Dimensions</span>
+    <span class="mobile-menu-item" data-target="role-playing-dims">Role-Playing Dimensions</span>
   </div>
   <div class="mobile-menu-group">
     <div class="mobile-menu-label">Examples (Simple → Complex)</div>
@@ -594,7 +598,7 @@ ul.clean-list li::before { content: '→'; position: absolute; left: 0; color: v
       The definitive guide to building analytics-ready data warehouses. From foundational concepts and relatable analogies to real-world e-commerce implementations and hands-on exercises — everything you need to think dimensionally and <strong>apply it on Day 1</strong>.
     </p>
     <div class="hero-meta">
-      <div class="hero-meta-item"><div class="icon" style="background:var(--accent-gold-dim);color:var(--accent-gold);">📖</div><span>27 Sections</span></div>
+      <div class="hero-meta-item"><div class="icon" style="background:var(--accent-gold-dim);color:var(--accent-gold);">📖</div><span>29 Sections</span></div>
       <div class="hero-meta-item"><div class="icon" style="background:var(--accent-blue-dim);color:var(--accent-blue);">🎯</div><span>5 Complexity Levels</span></div>
       <div class="hero-meta-item"><div class="icon" style="background:var(--accent-teal-dim);color:var(--accent-teal);">🏗️</div><span>Real Case Study</span></div>
       <div class="hero-meta-item"><div class="icon" style="background:var(--accent-purple-dim);color:var(--accent-purple);">🛠️</div><span>dbt + Exercises</span></div>
@@ -1498,6 +1502,270 @@ ul.clean-list li::before { content: '→'; position: absolute; left: 0; color: v
   <div class="analogy-box">
     <div class="analogy-title">Analogy — Phone Contact History</div>
     <p><strong>Type 1</strong> = Update friend's number; old one is gone. <strong>Type 2</strong> = Phone keeps every version: "Mobile (current)", "Mobile (old — until June 2024)". <strong>Type 3</strong> = Shows "Current: 555-1234, Previous: 555-9876" — just two slots. <strong>Type 6</strong> = Each version entry also shows the latest number for instant comparison.</p>
+  </div>
+</section>
+
+<!-- ═══════════ CONFORMED DIMENSIONS ═══════════ -->
+<section class="section" id="conformed-dims">
+  <div class="section-header">
+    <div class="section-number">Section 12B</div>
+    <h2 class="section-title">Conformed Dimensions</h2>
+    <div class="section-divider"></div>
+    <p class="section-subtitle">One dimension, shared across every fact table — the secret to cross-functional analytics</p>
+  </div>
+
+  <div class="card gold card-wide" style="margin-bottom:2rem;">
+    <h3>What Is a Conformed Dimension?</h3>
+    <p>A <strong>conformed dimension</strong> is a dimension table that is built once, maintained once, and reused identically across multiple fact tables. When <code>dim_date</code> appears in <code>fct_sales</code>, <code>fct_inventory</code>, and <code>fct_marketing</code>, the keys and attributes carry the <em>exact same meaning</em> everywhere — enabling "drill across" queries that span business processes.</p>
+    <p style="margin-top:1rem;">Ralph Kimball called conformed dimensions the <strong>"bus architecture"</strong> — just like a hardware bus connects all components, conformed dimensions connect all fact tables into a coherent enterprise data warehouse.</p>
+  </div>
+
+  <div class="analogy-box">
+    <div class="analogy-title">Analogy — A Universal Passport</div>
+    <p>Think of a conformed dimension like a passport. It's issued once (single source of truth), carries the same identity information everywhere, and is accepted at every border crossing (fact table). If each country issued its own incompatible ID, you'd have chaos — that's what happens when dimensions aren't conformed.</p>
+  </div>
+
+  <!-- Visual Diagram -->
+  <div class="diagram-container" style="padding:2rem;">
+    <div class="diagram-title">Conformed Dimensions in Action</div>
+    <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:1.5rem;align-items:start;max-width:950px;margin:0 auto;">
+      
+      <!-- Left: Dimensions -->
+      <div style="display:flex;flex-direction:column;gap:1rem;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:0.7rem;text-transform:uppercase;letter-spacing:2px;color:var(--accent-blue);margin-bottom:0.25rem;text-align:center;">Shared Dimensions</div>
+
+        <div style="background:var(--accent-blue-dim);border:1px solid rgba(59,130,246,0.3);border-radius:10px;padding:1rem;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:0.85rem;font-weight:600;color:var(--accent-blue);margin-bottom:0.5rem;">📅 dim_date</div>
+          <div style="font-size:0.78rem;color:var(--text-muted);line-height:1.6;">🔑 date_key<br>full_date · quarter · fiscal_year</div>
+        </div>
+
+        <div style="background:var(--accent-blue-dim);border:1px solid rgba(59,130,246,0.3);border-radius:10px;padding:1rem;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:0.85rem;font-weight:600;color:var(--accent-blue);margin-bottom:0.5rem;">📦 dim_product</div>
+          <div style="font-size:0.78rem;color:var(--text-muted);line-height:1.6;">🔑 product_key<br>product_name · category · brand</div>
+        </div>
+
+        <div style="background:var(--accent-blue-dim);border:1px solid rgba(59,130,246,0.3);border-radius:10px;padding:1rem;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:0.85rem;font-weight:600;color:var(--accent-blue);margin-bottom:0.5rem;">👤 dim_customer</div>
+          <div style="font-size:0.78rem;color:var(--text-muted);line-height:1.6;">🔑 customer_key<br>customer_name · segment · region</div>
+        </div>
+
+        <div style="background:var(--accent-blue-dim);border:1px solid rgba(59,130,246,0.3);border-radius:10px;padding:1rem;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:0.85rem;font-weight:600;color:var(--accent-blue);margin-bottom:0.5rem;">🏪 dim_store</div>
+          <div style="font-size:0.78rem;color:var(--text-muted);line-height:1.6;">🔑 store_key<br>store_name · city · country</div>
+        </div>
+      </div>
+
+      <!-- Center: Connection Lines -->
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.5rem;padding-top:2rem;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:var(--accent-gold);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:0.5rem;writing-mode:vertical-lr;transform:rotate(180deg);">Conformed Keys</div>
+        <div style="font-size:1.5rem;">🔗</div>
+        <div style="width:2px;height:180px;background:linear-gradient(180deg, var(--accent-orange), var(--accent-teal), var(--accent-purple));opacity:0.5;"></div>
+        <div style="font-size:0.7rem;color:var(--text-muted);text-align:center;max-width:80px;">Same keys, same meaning</div>
+      </div>
+
+      <!-- Right: Facts -->
+      <div style="display:flex;flex-direction:column;gap:1rem;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:0.7rem;text-transform:uppercase;letter-spacing:2px;color:var(--accent-orange);margin-bottom:0.25rem;text-align:center;">Fact Tables</div>
+
+        <div style="background:var(--accent-orange-dim);border:1px solid rgba(249,115,22,0.3);border-radius:10px;padding:1rem;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:0.85rem;font-weight:600;color:var(--accent-orange);margin-bottom:0.5rem;">💰 fct_sales</div>
+          <div style="font-size:0.78rem;color:var(--text-muted);line-height:1.6;">→ date_key · → product_key<br>→ customer_key · → store_key<br>revenue · quantity · discount</div>
+        </div>
+
+        <div style="background:var(--accent-teal-dim);border:1px solid rgba(20,184,166,0.3);border-radius:10px;padding:1rem;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:0.85rem;font-weight:600;color:var(--accent-teal);margin-bottom:0.5rem;">📊 fct_inventory</div>
+          <div style="font-size:0.78rem;color:var(--text-muted);line-height:1.6;">→ date_key · → product_key<br>→ store_key<br>qty_on_hand · reorder_point</div>
+        </div>
+
+        <div style="background:var(--accent-purple-dim);border:1px solid rgba(167,139,250,0.3);border-radius:10px;padding:1rem;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:0.85rem;font-weight:600;color:var(--accent-purple);margin-bottom:0.5rem;">📣 fct_marketing</div>
+          <div style="font-size:0.78rem;color:var(--text-muted);line-height:1.6;">→ date_key · → product_key<br>→ customer_key<br>impressions · clicks · spend</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Three key principles -->
+  <div class="grid-3" style="margin-top:2rem;">
+    <div class="card blue">
+      <div class="card-icon" style="background:var(--accent-blue-dim);color:var(--accent-blue);">🎯</div>
+      <h3>Single Source of Truth</h3>
+      <p>Each dimension is defined <strong>once</strong> and reused across all fact tables — no duplicated definitions, no conflicting hierarchies, no "which dim_customer is right?" debates.</p>
+    </div>
+    <div class="card teal">
+      <div class="card-icon" style="background:var(--accent-teal-dim);color:var(--accent-teal);">🔀</div>
+      <h3>Cross-Process Drill Across</h3>
+      <p>Because the keys conform, you can compare <strong>marketing spend vs. sales revenue</strong> for the same product in the same time period — the holy grail of enterprise analytics.</p>
+    </div>
+    <div class="card purple">
+      <div class="card-icon" style="background:var(--accent-purple-dim);color:var(--accent-purple);">🧩</div>
+      <h3>Selective Participation</h3>
+      <p>Not every dimension joins every fact. Customer doesn't link to Inventory; Store doesn't link to Marketing. <strong>Conformed ≠ universal</strong> — it means consistent where used.</p>
+    </div>
+  </div>
+
+  <!-- Cross-fact SQL Example -->
+  <div class="code-block" style="margin-top:2rem;">
+    <div class="code-label">SQL — Drill Across</div>
+<pre>
+<span class="cm">-- Compare sales revenue vs marketing spend by product and quarter</span>
+<span class="cm">-- This query works ONLY because dim_date and dim_product are conformed</span>
+
+<span class="kw">SELECT</span>
+    d.quarter,
+    p.category,
+    <span class="fn">SUM</span>(s.revenue)   <span class="kw">AS</span> total_revenue,
+    <span class="fn">SUM</span>(m.spend)     <span class="kw">AS</span> total_ad_spend,
+    <span class="fn">ROUND</span>(<span class="fn">SUM</span>(s.revenue) / <span class="fn">NULLIF</span>(<span class="fn">SUM</span>(m.spend), <span class="num">0</span>), <span class="num">2</span>) <span class="kw">AS</span> roas
+<span class="kw">FROM</span>      fct_sales     s
+<span class="kw">JOIN</span>      dim_date      d  <span class="kw">ON</span> s.date_key    = d.date_key
+<span class="kw">JOIN</span>      dim_product   p  <span class="kw">ON</span> s.product_key = p.product_key
+<span class="kw">JOIN</span>      fct_marketing m  <span class="kw">ON</span> s.date_key    = m.date_key
+                          <span class="kw">AND</span> s.product_key = m.product_key
+<span class="kw">GROUP BY</span>  d.quarter, p.category
+<span class="kw">ORDER BY</span>  d.quarter, roas <span class="kw">DESC</span>;
+</pre>
+  </div>
+</section>
+
+<!-- ═══════════ ROLE-PLAYING DIMENSIONS ═══════════ -->
+<section class="section" id="role-playing-dims">
+  <div class="section-header">
+    <div class="section-number">Section 12C</div>
+    <h2 class="section-title">Role-Playing Dimensions</h2>
+    <div class="section-divider"></div>
+    <p class="section-subtitle">One physical table, many business roles — how invoice date, order date, and ship date all live in dim_date</p>
+  </div>
+
+  <div class="card gold card-wide" style="margin-bottom:2rem;">
+    <h3>What Are Role-Playing Dimensions?</h3>
+    <p>A <strong>role-playing dimension</strong> is a single physical dimension table that is joined to the same fact table <em>multiple times</em>, each through a different foreign key representing a different <strong>business role</strong>. The dimension itself doesn't change — only the FK in the fact table changes.</p>
+    <p style="margin-top:1rem;">The most common example is <code>dim_date</code>: an orders fact table might have <code>order_date_key</code>, <code>invoice_date_key</code>, and <code>ship_date_key</code> — all pointing to the same dim_date table.</p>
+  </div>
+
+  <div class="analogy-box">
+    <div class="analogy-title">Analogy — One Actor, Many Roles</div>
+    <p>Think of <code>dim_date</code> as a versatile actor who appears in every scene of your business process, but wearing different costumes: once as "Order Date", once as "Invoice Date", once as "Ship Date". It's the same person (same table, same attributes) — the role changes based on context.</p>
+  </div>
+
+  <!-- Visual: Fact table with multiple date FKs -->
+  <div class="diagram-container">
+    <div class="diagram-title">fact_orders — Multiple Date Roles from One dim_date</div>
+    <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:2rem;align-items:center;max-width:850px;margin:0 auto;">
+      
+      <!-- Left: Fact Table -->
+      <div style="background:var(--accent-orange-dim);border:1px solid rgba(249,115,22,0.3);border-radius:12px;padding:1.5rem;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:0.95rem;font-weight:600;color:var(--accent-orange);margin-bottom:1rem;text-align:center;">📋 fact_orders</div>
+        <div style="display:flex;flex-direction:column;gap:0.6rem;">
+          <div style="display:flex;align-items:center;gap:0.5rem;padding:0.5rem 0.75rem;background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.25);border-radius:6px;">
+            <span style="font-size:0.7rem;color:var(--accent-blue);">→</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:0.8rem;color:var(--accent-blue);">order_date_key</span>
+            <span style="margin-left:auto;font-size:0.65rem;color:var(--text-muted);">FK</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:0.5rem;padding:0.5rem 0.75rem;background:rgba(20,184,166,0.1);border:1px solid rgba(20,184,166,0.25);border-radius:6px;">
+            <span style="font-size:0.7rem;color:var(--accent-teal);">→</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:0.8rem;color:var(--accent-teal);">invoice_date_key</span>
+            <span style="margin-left:auto;font-size:0.65rem;color:var(--text-muted);">FK</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:0.5rem;padding:0.5rem 0.75rem;background:rgba(167,139,250,0.1);border:1px solid rgba(167,139,250,0.25);border-radius:6px;">
+            <span style="font-size:0.7rem;color:var(--accent-purple);">→</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:0.8rem;color:var(--accent-purple);">ship_date_key</span>
+            <span style="margin-left:auto;font-size:0.65rem;color:var(--text-muted);">FK</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:0.5rem;padding:0.5rem 0.75rem;background:rgba(244,63,94,0.1);border:1px solid rgba(244,63,94,0.25);border-radius:6px;">
+            <span style="font-size:0.7rem;color:var(--accent-rose);">→</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:0.8rem;color:var(--accent-rose);">payment_date_key</span>
+            <span style="margin-left:auto;font-size:0.65rem;color:var(--text-muted);">FK</span>
+          </div>
+          <div style="border-top:1px dashed rgba(148,163,184,0.15);padding-top:0.5rem;margin-top:0.25rem;">
+            <div style="font-size:0.78rem;color:var(--text-muted);line-height:1.6;">→ product_key · → customer_key<br>revenue · quantity · discount</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Center: Arrows -->
+      <div style="display:flex;flex-direction:column;align-items:center;gap:0.4rem;">
+        <div style="font-size:0.75rem;color:var(--accent-blue);">← Order</div>
+        <div style="font-size:0.75rem;color:var(--accent-teal);">← Invoice</div>
+        <div style="font-size:0.75rem;color:var(--accent-purple);">← Ship</div>
+        <div style="font-size:0.75rem;color:var(--accent-rose);">← Payment</div>
+        <div style="margin-top:0.5rem;font-size:0.65rem;color:var(--text-muted);text-align:center;">All point to<br>the same table</div>
+      </div>
+
+      <!-- Right: dim_date -->
+      <div style="background:var(--accent-gold-dim);border:2px solid rgba(240,197,91,0.4);border-radius:12px;padding:1.5rem;box-shadow:0 0 30px rgba(240,197,91,0.08);">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:0.95rem;font-weight:600;color:var(--accent-gold);margin-bottom:1rem;text-align:center;">📅 dim_date</div>
+        <div style="font-size:0.78rem;color:var(--text-muted);line-height:1.8;">
+          🔑 <strong style="color:var(--accent-gold);">date_key</strong><br>
+          full_date<br>
+          day_of_week<br>
+          month · quarter<br>
+          fiscal_year<br>
+          is_holiday<br>
+          is_weekend
+        </div>
+        <div style="margin-top:0.75rem;padding-top:0.75rem;border-top:1px solid rgba(240,197,91,0.2);font-size:0.72rem;color:var(--accent-gold);text-align:center;font-weight:600;">Built once. Maintained once.<br>Reused in every role.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SQL Example -->
+  <div class="code-block" style="margin-top:2rem;">
+    <div class="code-label">SQL — Role-Playing Joins</div>
+<pre>
+<span class="cm">-- Each alias joins to the SAME dim_date, but via a different FK</span>
+
+<span class="kw">SELECT</span>
+    od.full_date    <span class="kw">AS</span> order_date,
+    id.full_date    <span class="kw">AS</span> invoice_date,
+    sd.full_date    <span class="kw">AS</span> ship_date,
+    pd.full_date    <span class="kw">AS</span> payment_date,
+    <span class="fn">DATEDIFF</span>(sd.full_date, od.full_date) <span class="kw">AS</span> days_to_ship,
+    <span class="fn">DATEDIFF</span>(pd.full_date, id.full_date) <span class="kw">AS</span> days_to_pay,
+    p.product_name,
+    f.revenue
+<span class="kw">FROM</span> fact_orders f
+<span class="kw">JOIN</span> dim_date    od <span class="kw">ON</span> f.order_date_key   = od.date_key   <span class="cm">-- role: Order Date</span>
+<span class="kw">JOIN</span> dim_date    id <span class="kw">ON</span> f.invoice_date_key = id.date_key   <span class="cm">-- role: Invoice Date</span>
+<span class="kw">JOIN</span> dim_date    sd <span class="kw">ON</span> f.ship_date_key    = sd.date_key   <span class="cm">-- role: Ship Date</span>
+<span class="kw">JOIN</span> dim_date    pd <span class="kw">ON</span> f.payment_date_key = pd.date_key   <span class="cm">-- role: Payment Date</span>
+<span class="kw">JOIN</span> dim_product  p <span class="kw">ON</span> f.product_key      = p.product_key;
+</pre>
+  </div>
+
+  <!-- Key Principles -->
+  <div class="grid-2" style="margin-top:2rem;">
+    <div class="card blue card-wide">
+      <h3>🏗️ Physical vs. Logical</h3>
+      <p><strong>Physically:</strong> There is only ONE <code>dim_date</code> table in the database.</p>
+      <p style="margin-top:0.5rem;"><strong>Logically:</strong> Each foreign key creates a "virtual" dimension. BI tools like Power BI, Looker, and Tableau let you create named views or aliases — so end users see "Order Date" and "Ship Date" as separate dimensions in the UI.</p>
+    </div>
+    <div class="card gold card-wide">
+      <h3>🚫 Anti-Pattern: Cloning Tables</h3>
+      <p>The wrong approach is creating <code>dim_order_date</code>, <code>dim_ship_date</code>, and <code>dim_invoice_date</code> as separate physical tables with identical schemas. This violates DRY, triples maintenance, and guarantees they'll drift out of sync.</p>
+      <p style="margin-top:0.5rem;"><strong>Rule:</strong> One physical table + multiple aliases = role-playing done right.</p>
+    </div>
+  </div>
+
+  <!-- Common role-playing dimensions beyond date -->
+  <div class="card teal card-wide" style="margin-top:1.5rem;">
+    <h3>📋 Common Role-Playing Dimensions Beyond Date</h3>
+    <table class="styled-table">
+      <thead><tr><th>Dimension</th><th>Example Roles in Fact Table</th><th>FK Names</th></tr></thead>
+      <tbody>
+        <tr><td><code>dim_date</code></td><td>Order date, Invoice date, Ship date, Payment date</td><td><code>order_date_key</code>, <code>invoice_date_key</code>, <code>ship_date_key</code></td></tr>
+        <tr><td><code>dim_employee</code></td><td>Salesperson, Approving manager, Assigned technician</td><td><code>salesperson_key</code>, <code>manager_key</code>, <code>technician_key</code></td></tr>
+        <tr><td><code>dim_location</code></td><td>Origin warehouse, Destination store, Billing address</td><td><code>origin_key</code>, <code>destination_key</code>, <code>billing_location_key</code></td></tr>
+        <tr><td><code>dim_account</code></td><td>Source account, Target account (in transfers)</td><td><code>source_account_key</code>, <code>target_account_key</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="exercise-box" style="margin-top:2rem;">
+    <div class="exercise-title">Exercise — Spot the Roles</div>
+    <div class="exercise-difficulty" style="color:var(--accent-teal);">⚡ Intermediate</div>
+    <p>Your company's <code>fact_shipments</code> table needs to track: <strong>origin warehouse</strong>, <strong>destination store</strong>, and <strong>return facility</strong>. All three are locations with the same attributes (name, city, region, country).</p>
+    <p style="margin-top:0.75rem;"><strong>Task:</strong> (1) Should you create three separate dim tables or one role-playing dim? (2) Write the FK columns for fact_shipments. (3) Write a SQL query that calculates average shipping distance between origin and destination cities.</p>
   </div>
 </section>
 
@@ -2753,7 +3021,7 @@ models:
     <a href="https://www.meetvaruntyagi.com" target="_blank" rel="noopener">Portfolio</a>
   </div>
   <div class="footer-credit">Crafted for the <strong style="color:var(--accent-gold);">AI Catalyst Cohort</strong> by Varun Tyagi</div>
-  <div style="color:var(--text-muted);font-size:0.75rem;margin-top:0.5rem;">© 2025 — Built on Kimball's timeless principles for the modern data era</div>
+  <div style="color:var(--text-muted);font-size:0.75rem;margin-top:0.5rem;">© 2026 — Built on Kimball's timeless principles for the modern data era</div>
 </footer>
 
 </div><!-- end main-content -->
