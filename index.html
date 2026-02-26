@@ -1525,62 +1525,93 @@ ul.clean-list li::before { content: '→'; position: absolute; left: 0; color: v
     <p>Think of a conformed dimension like a passport. It's issued once (single source of truth), carries the same identity information everywhere, and is accepted at every border crossing (fact table). If each country issued its own incompatible ID, you'd have chaos — that's what happens when dimensions aren't conformed.</p>
   </div>
 
-  <!-- Visual Diagram -->
+  <!-- Visual Diagram with SVG Connection Lines -->
   <div class="diagram-container" style="padding:2rem;">
     <div class="diagram-title">Conformed Dimensions in Action</div>
-    <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:1.5rem;align-items:start;max-width:950px;margin:0 auto;">
+    <div style="position:relative;max-width:1000px;margin:0 auto;min-height:520px;" id="conformedDiagram">
       
-      <!-- Left: Dimensions -->
-      <div style="display:flex;flex-direction:column;gap:1rem;">
-        <div style="font-family:'JetBrains Mono',monospace;font-size:0.7rem;text-transform:uppercase;letter-spacing:2px;color:var(--accent-blue);margin-bottom:0.25rem;text-align:center;">Shared Dimensions</div>
+      <!-- SVG Connection Lines Layer -->
+      <svg id="conformedSvg" style="position:absolute;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;" preserveAspectRatio="none">
+        <defs>
+          <marker id="arrowSales" markerWidth="6" markerHeight="6" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6" fill="none" stroke="#f97316" stroke-width="1"/></marker>
+          <marker id="arrowInventory" markerWidth="6" markerHeight="6" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6" fill="none" stroke="#14b8a6" stroke-width="1"/></marker>
+          <marker id="arrowMarketing" markerWidth="6" markerHeight="6" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6" fill="none" stroke="#a78bfa" stroke-width="1"/></marker>
+        </defs>
+        <!-- Lines will be drawn by JS -->
+      </svg>
 
-        <div style="background:var(--accent-blue-dim);border:1px solid rgba(59,130,246,0.3);border-radius:10px;padding:1rem;">
-          <div style="font-family:'JetBrains Mono',monospace;font-size:0.85rem;font-weight:600;color:var(--accent-blue);margin-bottom:0.5rem;">📅 dim_date</div>
-          <div style="font-size:0.78rem;color:var(--text-muted);line-height:1.6;">🔑 date_key<br>full_date · quarter · fiscal_year</div>
+      <!-- Left Column: Dimensions -->
+      <div style="position:absolute;left:0;top:0;width:30%;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:0.7rem;text-transform:uppercase;letter-spacing:2px;color:var(--accent-blue);margin-bottom:0.75rem;text-align:center;">Shared Dimensions</div>
+
+        <div id="cd-dim-date" style="background:var(--accent-blue-dim);border:1px solid rgba(59,130,246,0.3);border-radius:10px;padding:0.85rem;margin-bottom:0.75rem;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:0.82rem;font-weight:600;color:var(--accent-blue);margin-bottom:0.35rem;">📅 dim_date</div>
+          <div style="font-size:0.75rem;color:var(--text-muted);line-height:1.5;">🔑 date_key · full_date · quarter · fiscal_year</div>
         </div>
 
-        <div style="background:var(--accent-blue-dim);border:1px solid rgba(59,130,246,0.3);border-radius:10px;padding:1rem;">
-          <div style="font-family:'JetBrains Mono',monospace;font-size:0.85rem;font-weight:600;color:var(--accent-blue);margin-bottom:0.5rem;">📦 dim_product</div>
-          <div style="font-size:0.78rem;color:var(--text-muted);line-height:1.6;">🔑 product_key<br>product_name · category · brand</div>
+        <div id="cd-dim-product" style="background:var(--accent-blue-dim);border:1px solid rgba(59,130,246,0.3);border-radius:10px;padding:0.85rem;margin-bottom:0.75rem;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:0.82rem;font-weight:600;color:var(--accent-blue);margin-bottom:0.35rem;">📦 dim_product</div>
+          <div style="font-size:0.75rem;color:var(--text-muted);line-height:1.5;">🔑 product_key · product_name · category · brand</div>
         </div>
 
-        <div style="background:var(--accent-blue-dim);border:1px solid rgba(59,130,246,0.3);border-radius:10px;padding:1rem;">
-          <div style="font-family:'JetBrains Mono',monospace;font-size:0.85rem;font-weight:600;color:var(--accent-blue);margin-bottom:0.5rem;">👤 dim_customer</div>
-          <div style="font-size:0.78rem;color:var(--text-muted);line-height:1.6;">🔑 customer_key<br>customer_name · segment · region</div>
+        <div id="cd-dim-customer" style="background:var(--accent-blue-dim);border:1px solid rgba(59,130,246,0.3);border-radius:10px;padding:0.85rem;margin-bottom:0.75rem;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:0.82rem;font-weight:600;color:var(--accent-blue);margin-bottom:0.35rem;">👤 dim_customer</div>
+          <div style="font-size:0.75rem;color:var(--text-muted);line-height:1.5;">🔑 customer_key · customer_name · segment · region</div>
         </div>
 
-        <div style="background:var(--accent-blue-dim);border:1px solid rgba(59,130,246,0.3);border-radius:10px;padding:1rem;">
-          <div style="font-family:'JetBrains Mono',monospace;font-size:0.85rem;font-weight:600;color:var(--accent-blue);margin-bottom:0.5rem;">🏪 dim_store</div>
-          <div style="font-size:0.78rem;color:var(--text-muted);line-height:1.6;">🔑 store_key<br>store_name · city · country</div>
+        <div id="cd-dim-store" style="background:var(--accent-blue-dim);border:1px solid rgba(59,130,246,0.3);border-radius:10px;padding:0.85rem;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:0.82rem;font-weight:600;color:var(--accent-blue);margin-bottom:0.35rem;">🏪 dim_store</div>
+          <div style="font-size:0.75rem;color:var(--text-muted);line-height:1.5;">🔑 store_key · store_name · city · country</div>
         </div>
       </div>
 
-      <!-- Center: Connection Lines -->
-      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.5rem;padding-top:2rem;">
-        <div style="font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:var(--accent-gold);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:0.5rem;writing-mode:vertical-lr;transform:rotate(180deg);">Conformed Keys</div>
-        <div style="font-size:1.5rem;">🔗</div>
-        <div style="width:2px;height:180px;background:linear-gradient(180deg, var(--accent-orange), var(--accent-teal), var(--accent-purple));opacity:0.5;"></div>
-        <div style="font-size:0.7rem;color:var(--text-muted);text-align:center;max-width:80px;">Same keys, same meaning</div>
+      <!-- Right Column: Facts -->
+      <div style="position:absolute;right:0;top:0;width:33%;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:0.7rem;text-transform:uppercase;letter-spacing:2px;color:var(--accent-orange);margin-bottom:0.75rem;text-align:center;">Fact Tables</div>
+
+        <div id="cd-fct-sales" style="background:var(--accent-orange-dim);border:1px solid rgba(249,115,22,0.3);border-radius:10px;padding:0.85rem;margin-bottom:0.75rem;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:0.82rem;font-weight:600;color:var(--accent-orange);margin-bottom:0.35rem;">💰 fct_sales</div>
+          <div style="font-size:0.75rem;color:var(--text-muted);line-height:1.5;">→ date_key · → product_key<br>→ customer_key · → store_key<br>revenue · quantity · discount</div>
+        </div>
+
+        <div id="cd-fct-inventory" style="background:var(--accent-teal-dim);border:1px solid rgba(20,184,166,0.3);border-radius:10px;padding:0.85rem;margin-bottom:0.75rem;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:0.82rem;font-weight:600;color:var(--accent-teal);margin-bottom:0.35rem;">📊 fct_inventory</div>
+          <div style="font-size:0.75rem;color:var(--text-muted);line-height:1.5;">→ date_key · → product_key<br>→ store_key<br>qty_on_hand · reorder_point</div>
+        </div>
+
+        <div id="cd-fct-marketing" style="background:var(--accent-purple-dim);border:1px solid rgba(167,139,250,0.3);border-radius:10px;padding:0.85rem;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:0.82rem;font-weight:600;color:var(--accent-purple);margin-bottom:0.35rem;">📣 fct_marketing</div>
+          <div style="font-size:0.75rem;color:var(--text-muted);line-height:1.5;">→ date_key · → product_key<br>→ customer_key<br>impressions · clicks · spend</div>
+        </div>
       </div>
 
-      <!-- Right: Facts -->
-      <div style="display:flex;flex-direction:column;gap:1rem;">
-        <div style="font-family:'JetBrains Mono',monospace;font-size:0.7rem;text-transform:uppercase;letter-spacing:2px;color:var(--accent-orange);margin-bottom:0.25rem;text-align:center;">Fact Tables</div>
-
-        <div style="background:var(--accent-orange-dim);border:1px solid rgba(249,115,22,0.3);border-radius:10px;padding:1rem;">
-          <div style="font-family:'JetBrains Mono',monospace;font-size:0.85rem;font-weight:600;color:var(--accent-orange);margin-bottom:0.5rem;">💰 fct_sales</div>
-          <div style="font-size:0.78rem;color:var(--text-muted);line-height:1.6;">→ date_key · → product_key<br>→ customer_key · → store_key<br>revenue · quantity · discount</div>
+      <!-- Center Legend -->
+      <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);text-align:center;z-index:2;">
+        <div style="width:90px;height:90px;border-radius:50%;border:1.5px dashed rgba(240,197,91,0.3);display:flex;align-items:center;justify-content:center;flex-direction:column;background:radial-gradient(circle,rgba(240,197,91,0.06) 0%,transparent 70%);margin:0 auto 0.5rem;">
+          <div style="font-size:1.5rem;">🔗</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:0.55rem;letter-spacing:1px;text-transform:uppercase;color:var(--accent-gold);opacity:0.8;">Conformed</div>
         </div>
+        <div style="font-size:0.65rem;color:var(--text-muted);max-width:100px;line-height:1.4;">Same keys, same meaning, across all facts</div>
+      </div>
 
-        <div style="background:var(--accent-teal-dim);border:1px solid rgba(20,184,166,0.3);border-radius:10px;padding:1rem;">
-          <div style="font-family:'JetBrains Mono',monospace;font-size:0.85rem;font-weight:600;color:var(--accent-teal);margin-bottom:0.5rem;">📊 fct_inventory</div>
-          <div style="font-size:0.78rem;color:var(--text-muted);line-height:1.6;">→ date_key · → product_key<br>→ store_key<br>qty_on_hand · reorder_point</div>
-        </div>
+    </div>
 
-        <div style="background:var(--accent-purple-dim);border:1px solid rgba(167,139,250,0.3);border-radius:10px;padding:1rem;">
-          <div style="font-family:'JetBrains Mono',monospace;font-size:0.85rem;font-weight:600;color:var(--accent-purple);margin-bottom:0.5rem;">📣 fct_marketing</div>
-          <div style="font-size:0.78rem;color:var(--text-muted);line-height:1.6;">→ date_key · → product_key<br>→ customer_key<br>impressions · clicks · spend</div>
-        </div>
+    <!-- Connection Legend -->
+    <div style="display:flex;justify-content:center;gap:1.5rem;margin-top:1rem;flex-wrap:wrap;">
+      <div style="display:flex;align-items:center;gap:0.4rem;font-size:0.75rem;font-family:'JetBrains Mono',monospace;">
+        <svg width="30" height="8"><line x1="0" y1="4" x2="30" y2="4" stroke="#f97316" stroke-width="1.5" stroke-dasharray="4 3"/></svg>
+        <span style="color:var(--accent-orange);">Sales</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:0.4rem;font-size:0.75rem;font-family:'JetBrains Mono',monospace;">
+        <svg width="30" height="8"><line x1="0" y1="4" x2="30" y2="4" stroke="#14b8a6" stroke-width="1.5" stroke-dasharray="4 3"/></svg>
+        <span style="color:var(--accent-teal);">Inventory</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:0.4rem;font-size:0.75rem;font-family:'JetBrains Mono',monospace;">
+        <svg width="30" height="8"><line x1="0" y1="4" x2="30" y2="4" stroke="#a78bfa" stroke-width="1.5" stroke-dasharray="4 3"/></svg>
+        <span style="color:var(--accent-purple);">Marketing</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:0.4rem;font-size:0.75rem;color:var(--text-muted);">
+        <span style="font-style:italic;">dim_customer → no inventory link; dim_store → no marketing link</span>
       </div>
     </div>
   </div>
@@ -3167,6 +3198,75 @@ var observer = new IntersectionObserver(function(entries) {
 }, { rootMargin: '-20% 0px -70% 0px' });
 
 sections.forEach(function(s) { observer.observe(s); });
+
+// ── Conformed Dimensions SVG Lines ──
+function drawConformedLines() {
+  var svg = document.getElementById('conformedSvg');
+  var container = document.getElementById('conformedDiagram');
+  if (!svg || !container) return;
+
+  // Clear existing lines
+  var existing = svg.querySelectorAll('.cd-line');
+  existing.forEach(function(l) { l.remove(); });
+
+  var containerRect = container.getBoundingClientRect();
+
+  function getCenter(id) {
+    var el = document.getElementById(id);
+    if (!el) return null;
+    var r = el.getBoundingClientRect();
+    return {
+      x: r.left - containerRect.left + r.width / 2,
+      y: r.top - containerRect.top + r.height / 2,
+      right: r.right - containerRect.left,
+      left: r.left - containerRect.left
+    };
+  }
+
+  // Connection map: [dim_id, fact_id, color, offset]
+  // offset shifts the line vertically to avoid overlaps
+  var connections = [
+    // dim_date → all 3 facts
+    ['cd-dim-date', 'cd-fct-sales',     '#f97316', -4],
+    ['cd-dim-date', 'cd-fct-inventory', '#14b8a6',  0],
+    ['cd-dim-date', 'cd-fct-marketing', '#a78bfa',  4],
+    // dim_product → all 3 facts
+    ['cd-dim-product', 'cd-fct-sales',     '#f97316', -4],
+    ['cd-dim-product', 'cd-fct-inventory', '#14b8a6',  0],
+    ['cd-dim-product', 'cd-fct-marketing', '#a78bfa',  4],
+    // dim_customer → sales + marketing (NOT inventory)
+    ['cd-dim-customer', 'cd-fct-sales',     '#f97316', -3],
+    ['cd-dim-customer', 'cd-fct-marketing', '#a78bfa',  3],
+    // dim_store → sales + inventory (NOT marketing)
+    ['cd-dim-store', 'cd-fct-sales',     '#f97316', -3],
+    ['cd-dim-store', 'cd-fct-inventory', '#14b8a6',  3]
+  ];
+
+  // Update SVG viewBox to match container
+  svg.setAttribute('viewBox', '0 0 ' + containerRect.width + ' ' + containerRect.height);
+
+  connections.forEach(function(conn) {
+    var from = getCenter(conn[0]);
+    var to = getCenter(conn[1]);
+    if (!from || !to) return;
+
+    var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('class', 'cd-line');
+    line.setAttribute('x1', from.right + 2);
+    line.setAttribute('y1', from.y + conn[3]);
+    line.setAttribute('x2', to.left - 2);
+    line.setAttribute('y2', to.y + conn[3]);
+    line.setAttribute('stroke', conn[2]);
+    line.setAttribute('stroke-width', '1.3');
+    line.setAttribute('stroke-dasharray', '5 4');
+    line.setAttribute('opacity', '0.45');
+    svg.appendChild(line);
+  });
+}
+
+// Draw lines after DOM is ready and on resize
+setTimeout(drawConformedLines, 300);
+window.addEventListener('resize', drawConformedLines);
 </script>
 </body>
 </html>
